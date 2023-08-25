@@ -9,6 +9,7 @@ import GoogleLogo from "@images/logos/google.svg";
 import TwitterLogo from "@images/logos/twitter.svg";
 import MetaLogo from "@images/logos/meta.svg";
 import { signIn } from "next-auth/react";
+import { usePusher } from "@harelpls/use-pusher";
 
 interface Props {
   title: string;
@@ -19,7 +20,6 @@ const Form: React.FC<PropsWithChildren<Props>> = ({ children, title }) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const formDataObj = Object.fromEntries(formData.entries());
-    console.log({ ...formData });
     signIn("credentials", {
       ...formDataObj,
       callbackUrl: `${window.location.origin}/chat`,

@@ -21,7 +21,7 @@ const ConversationTab: React.FC<Props> = ({
   const router = useRouter();
   return (
     <div
-      className="flex justify-around py-3 overflow-hidden select-none rounded-lg px-5 gap-4 hover:bg-surface-light cursor-pointer hover:dark:bg-surface-dark"
+      className="flex justify-around items-center py-3 overflow-hidden select-none rounded-lg px-5 gap-4 hover:bg-surface-light cursor-pointer hover:dark:bg-surface-dark"
       onClick={() => router.push(`/chat/${id}`)}
     >
       <Image

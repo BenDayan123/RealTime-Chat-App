@@ -1,26 +1,28 @@
 "use client";
 
-import { useState } from "react";
-// import EmojiEmotions from "@mui/icons-material/EmojiEmotions";
-// import Send from "@mui/icons-material/Send";
-import { useSocket } from "@hooks/useSocket";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import RecordButton from "./recorder";
 import TextareaAutosize from "react-textarea-autosize";
 import EmojiPicker from "emoji-picker-react";
+// import EmojiEmotions from "@mui/icons-material/EmojiEmotions";
+// import Send from "@mui/icons-material/Send";
 
 interface Props {
   id: string;
 }
 
 const MessageForm: React.FC<Props> = ({ id }) => {
-  const socket = useSocket();
-
-  const [value, setValue] = useState("");
+  const [text, setText] = useState("");
   const [showEmojis, setEmojis] = useState(false);
 
+  // useEffect(() => {
+  //   console.log({ members });
+  // }, [members]);
+
   function handleSend() {
-    value && socket?.send({ message: value, chatID: id });
-    setValue("");
+    axios.post("/api/message", { text, roomID: `presence-room-${id}` });
+    setText("");
   }
 
   function EmojiToggle() {
@@ -33,7 +35,7 @@ const MessageForm: React.FC<Props> = ({ id }) => {
     >
       <RecordButton />
       <TextareaAutosize
-        value={value}
+        value={text}
         minRows={1}
         rows={1}
         maxRows={10}
@@ -45,7 +47,7 @@ const MessageForm: React.FC<Props> = ({ id }) => {
           }
           return true;
         }}
-        onInput={(e) => setValue(e.currentTarget.value)}
+        onInput={(e) => setText(e.currentTarget.value)}
         placeholder="Type a message..."
         className="resize-none w-full h-full px-3 outline-none bg-tran text-onBG-light dark:text-onBG-dark"
       />
@@ -62,7 +64,7 @@ const MessageForm: React.FC<Props> = ({ id }) => {
       {showEmojis && (
         <div className="absolute -top-4 right-0 -translate-y-full">
           <EmojiPicker
-            onEmojiClick={(emoji) => setValue((prev) => prev + emoji.emoji)}
+            onEmojiClick={(emoji) => setText((prev) => prev + emoji.emoji)}
             emojiStyle={"native" as any}
           />
         </div>

@@ -15,7 +15,16 @@ type Props = {
 };
 
 const NextAuthProvider = ({ children, session }: Props) => {
-  const [queryClient] = useState(() => new QueryClient());
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            refetchOnWindowFocus: false,
+          },
+        },
+      })
+  );
 
   return (
     <SessionProvider session={session}>

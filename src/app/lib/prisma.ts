@@ -1,9 +1,8 @@
 import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcrypt";
 
-const salt = bcrypt.genSaltSync(10);
+const globalForPrisma = global as unknown as { prisma: PrismaClient }
 
-export const prisma = new PrismaClient({ log: ["warn"] })
+export const prisma = globalForPrisma.prisma || new PrismaClient({ log: ["warn"] })
 .$extends({
   query:{
     user:{
@@ -32,4 +31,4 @@ export const prisma = new PrismaClient({ log: ["warn"] })
   }
 });
 
-// if (process.env.NODE_ENV !== "production") globalForPrisma.prisma;
+if (process.env.NODE_ENV !== "production") globalForPrisma.prisma;

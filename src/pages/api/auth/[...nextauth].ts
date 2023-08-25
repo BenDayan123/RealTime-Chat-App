@@ -5,23 +5,6 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@lib/prisma";
 import CredentialsProvider from "next-auth/providers/credentials";
 
-declare global {
-  namespace NodeJS {
-    interface ProcessEnv {
-      AUTH0_SECRET: string;
-      AUTH0_ISSUER_BASE_URL: string;
-      AUTH0_CLIENT_ID: string;
-      AUTH0_CLIENT_SECRET: string;
-      GOOGLE_CLIENT_ID: string;
-      GOOGLE_CLIENT_SECRET: string;
-      NEXTAUTH_SECRET: string;
-      FACEBOOK_CLIENT_ID: string;
-      FACEBOOK_CLIENT_SECRET: string;
-      TWITTER_CLIENT_ID: string;
-      TWITTER_CLIENT_SECRET: string;
-    }
-  }
-}
 const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, NEXTAUTH_SECRET } = process.env;
 // const { AUTH0_CLIENT_ID, AUTH0_CLIENT_SECRET, AUTH0_ISSUER } = process.env;
 // const { FACEBOOK_CLIENT_ID, FACEBOOK_CLIENT_SECRET } = process.env;
@@ -58,15 +41,13 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async jwt({ token, user, trigger, session }) {
-      if(trigger === "update"){
-        return { ...token, ...session }; 
-      }
+      // if(trigger === "update"){
+      //   return { ...token, ...session }; 
+      // }
       return { ...token, ...user };
     },
     async session({ session, token }) {
-      if(token && session.user) {
-        session.user.id = token.sub || "";
-      }
+      session.user.id = token.id as string;
       return session;
     },
   },
