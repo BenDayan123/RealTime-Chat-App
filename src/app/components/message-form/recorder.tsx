@@ -2,6 +2,7 @@
 
 // import KeyboardVoice from "@mui/icons-material/KeyboardVoice";
 import { useEffect, useState } from "react";
+import { MdKeyboardVoice } from "react-icons/md";
 
 const mimeType = "audio/webm";
 
@@ -47,7 +48,10 @@ const RecordButton: React.FC = () => {
   return (
     <>
       <i onMouseDown={handleRecording} onMouseUp={handleRecording}>
-        {/* <KeyboardVoice className="fill-onBG-light dark:fill-onBG-dark active:scale-90 cursor-pointer opacity-60" /> */}
+        <MdKeyboardVoice
+          className="fill-onBG-light dark:fill-onBG-dark active:scale-90 cursor-pointer opacity-60"
+          size={25}
+        />
       </i>
       {/* {blob && (
         <AudioVisualizer

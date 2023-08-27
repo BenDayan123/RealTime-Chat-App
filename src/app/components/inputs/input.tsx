@@ -1,21 +1,26 @@
-"use client";
-
 // import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-
+import { IconType } from "react-icons";
 interface Props
   extends React.DetailedHTMLProps<
     React.InputHTMLAttributes<HTMLInputElement>,
     HTMLInputElement
-  > {}
+  > {
+  icon?: IconType;
+}
 
 const Input: React.FC<Props> = (props) => {
-  const { name, ...rest } = props;
+  const { name, icon: Icon, ...rest } = props;
   return (
     <div
       className="relative mt-4 flex items-center overflow-hidden shadow-lg rounded-lg border-2 border-tran bg-surface-light
      text-onSurface-light focus-within:border-blue-500 dark:bg-surface-dark dark:shadow-none dark:text-onSurface-dark"
     >
-      {/* <AccountCircleIcon className="peer-foucs:fill-blue-500 mx-3 peer-valid:fill-blue-500" /> */}
+      {Icon && (
+        <Icon
+          className="peer-foucs:fill-blue-500 mx-3 peer-valid:fill-blue-500"
+          size={30}
+        />
+      )}
       <div className="relative w-full">
         <input
           {...rest}

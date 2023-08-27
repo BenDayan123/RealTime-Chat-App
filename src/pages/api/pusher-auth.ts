@@ -10,7 +10,7 @@ const pusher = new Pusher({
   key: PUSHER_CLIENT_KEY,
   secret: PUSHER_SECERT,
   cluster: PUSHER_CLUSTER,
-  useTLS: true
+  useTLS: false
 })
 
 export default async function PusherHandler(req: NextApiRequest, res: NextApiResponse) {

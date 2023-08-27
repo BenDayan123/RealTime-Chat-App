@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import ProfileStatus from "./profileStatus";
 
 interface Props {
   name: string;
@@ -9,6 +10,7 @@ interface Props {
   time: string;
   image: string;
   id: string;
+  status?: "online" | "offline";
 }
 
 const ConversationTab: React.FC<Props> = ({
@@ -16,20 +18,22 @@ const ConversationTab: React.FC<Props> = ({
   id,
   image,
   lastStatus,
+  status,
   time,
 }) => {
   const router = useRouter();
   return (
     <div
-      className="flex justify-around items-center py-3 overflow-hidden select-none rounded-lg px-5 gap-4 hover:bg-surface-light cursor-pointer hover:dark:bg-surface-dark"
-      onClick={() => router.push(`/chat/${id}`)}
+      className="flex justify-around items-center py-3 overflow-hidden select-none rounded-lg px-5 gap-4 hover:bg-background-light cursor-pointer hover:dark:bg-background-dark"
+      onClick={() => router.push(`/app/chat/${id}`)}
     >
-      <Image
+      <ProfileStatus
         className="rounded-full aspect-square object-cover"
         src={image}
         alt={name}
-        width={50}
-        height={50}
+        width={35}
+        height={35}
+        status={status}
       />
       <div className="flex-1">
         <p className="text-onBG-light dark:text-onBG-dark font-bold">{name}</p>

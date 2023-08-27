@@ -21,7 +21,7 @@ html{
     --epr-bg-color: #1f1f1f;
   }
   *{
-    @apply transition-colors duration-150;
+    @apply transition-colors duration-100;
   }
 }
 
@@ -58,4 +58,4 @@ html{
   &:hover{
     background: darken($color, 15%);
   }
-} 
+}

@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import axios from "axios";
 import RecordButton from "./recorder";
 import TextareaAutosize from "react-textarea-autosize";
 import EmojiPicker from "emoji-picker-react";
+import { MdEmojiEmotions, MdSend } from "react-icons/md";
+
 // import EmojiEmotions from "@mui/icons-material/EmojiEmotions";
 // import Send from "@mui/icons-material/Send";
 
@@ -31,7 +33,7 @@ const MessageForm: React.FC<Props> = ({ id }) => {
 
   return (
     <div
-      className={`relative bg-background-light px-6 py-4 gap-2 dark:bg-background-dark rounded-md flex items-start border-blue-400 border-2 dark:border-opacity-0`}
+      className={`relative bg-surface-light px-6 py-4 gap-2 dark:bg-surface-dark rounded-md flex items-start border-blue-400 border-2 dark:border-opacity-0`}
     >
       <RecordButton />
       <TextareaAutosize
@@ -52,14 +54,18 @@ const MessageForm: React.FC<Props> = ({ id }) => {
         className="resize-none w-full h-full px-3 outline-none bg-tran text-onBG-light dark:text-onBG-dark"
       />
       <i onClick={EmojiToggle}>
-        {/* <EmojiEmotions className="fill-onBG-light dark:fill-onBG-dark opacity-60 cursor-pointer" /> */}
+        <MdEmojiEmotions
+          className="fill-onBG-light dark:fill-onBG-dark opacity-60 cursor-pointer"
+          size={25}
+        />
       </i>
       <i onClick={handleSend}>
-        {/* <Send
+        <MdSend
+          size={25}
           className={`fill-onBG-light dark:fill-onBG-dark opacity-60 cursor-pointer ${
-            value === "" ? "opacity-10 pointer-events-none" : ""
+            text === "" ? "opacity-10 pointer-events-none" : ""
           }`}
-        /> */}
+        />
       </i>
       {showEmojis && (
         <div className="absolute -top-4 right-0 -translate-y-full">

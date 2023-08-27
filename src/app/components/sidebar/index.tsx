@@ -1,11 +1,12 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCallback, useEffect, useState } from "react";
+import { MdPeopleAlt } from "react-icons/md";
 import { useSession } from "next-auth/react";
 import { IFriend } from "@interfaces/user";
 import ConversationTab from "@components/conversationTab";
 import { usePusher } from "@harelpls/use-pusher";
+import Item from "./item";
 
 interface WatchListEvent {
   name: "online" | "offline";
@@ -13,25 +14,21 @@ interface WatchListEvent {
 }
 
 const SideBar: React.FC = () => {
-  const queryClient = useQueryClient();
   const { data: session } = useSession();
   const { client: pusher } = usePusher();
-  const key = ["friends", session?.user.id];
+  // const queryClient = useQueryClient();
+  // const key = ["friends", session?.user.id];
+  const [friends, setFriends] = useState<IFriend[]>([]);
 
-  const { data: friends } = useQuery<IFriend[]>({
-    queryKey: key,
-    queryFn: async () => {
-      const res = await fetch(`/api/user/${session?.user.id}/friends`);
-      if (!res.ok) throw new Error("Network response was not ok");
-      return res.json();
-    },
-    staleTime: Infinity,
-    cacheTime: Infinity,
-  });
+  useEffect(() => {
+    fetch(`/api/user/${session?.user.id}/friends`)
+      .then((res) => res.json())
+      .then((body) => setFriends(body));
+  }, []);
 
   const watchlistEventHandler = useCallback((event: WatchListEvent) => {
     const { name, user_ids } = event;
-    queryClient.setQueryData(key, (old: any) => {
+    setFriends((old) => {
       return old?.map((friend: any) => {
         if (user_ids.includes(friend.id)) friend.status = name;
         return friend;
@@ -45,7 +42,12 @@ const SideBar: React.FC = () => {
   }, [pusher]);
 
   return (
-    <div id="sidebar" className="bg-background-light dark:bg-background-dark">
+    <div id="sidebar" className="bg-surface-light dark:bg-surface-dark">
+      <ul className="p-3">
+        <Item icon={MdPeopleAlt} navTo="/app/friends">
+          Friends
+        </Item>
+      </ul>
       <div className="flex flex-col gap-1 p-3 overflow-auto">
         {friends?.map((friend) => {
           const { image, name, id, status } = friend;
@@ -56,7 +58,8 @@ const SideBar: React.FC = () => {
               image={image}
               name={name}
               time="02:31 PM"
-              lastStatus={status || "IDLE"}
+              status={status}
+              lastStatus={status || "Loading...."}
             />
           );
         })}

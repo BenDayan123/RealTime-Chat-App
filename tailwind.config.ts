@@ -16,7 +16,7 @@ const config: Config = {
           dark: "#121212"
         },
         surface: {
-          light: "#ffffff",
+          light: "#f5f7fb",
           dark: "#1e1e1e"
         },
         primary: {
