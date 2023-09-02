@@ -43,7 +43,7 @@ const Form: React.FC<PropsWithChildren<Props>> = ({ children, title }) => {
         </div>
         <form className="w-full" onSubmit={handleSubmit}>
           {children}
-          <SubmitButton type="submit">Sign In</SubmitButton>
+          <SubmitButton type="submit" name="Sign In" />
         </form>
       </div>
     </div>
