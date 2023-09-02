@@ -1,32 +1,46 @@
 import { PrismaClient } from "@prisma/client";
 
 const globalForPrisma = global as unknown as { prisma: PrismaClient }
-
-export const prisma = globalForPrisma.prisma || new PrismaClient({ log: ["warn"] })
+// globalForPrisma.prisma || 
+export const prisma = new PrismaClient({ log: ["warn"] })
 .$extends({
   query:{
-    user:{
-      // create({ args, query }){
-      //   args.data.password = bcrypt.hashSync(args.data.password, salt)
-      //   return query(args);
-      // }
-    }
+    user:{}
   },
   model:{
     user:{
-      
-      // async addFriendShips(id1:string, id2: string) {
-      //   await prisma.user.update({
-      //     where: { id: id1 },
-      //     data: { friends: { connect: [{ id: id2 }]} },
-      //   });
-      //   await prisma.user.update({
-      //     where: { id: id2 },
-      //     data: { friends: {connect: [{ id: id1 }]} },
-      //   });
-      //   return { user1: id1, user2: id2 };
-      // }
-
+      async getFriends(id: string){
+        const user = await prisma.user.findUnique({
+          where: { id },
+          include:{
+            friends: {
+              where:{
+                status: "PENDING"
+              },
+              include: {
+                friend1: true,
+                friend2: true,
+              }
+            },
+            symmetricFriends: {
+              where:{
+                status: "PENDING"
+              },
+              include: {
+                friend1: true,
+                friend2: true,
+              }
+            },
+          }
+        });
+        if(!user) return [];
+        const { friends, symmetricFriends } = user;
+        const friendsList:any = [];
+        [...friends, ...symmetricFriends].map((friendship) => {
+          friendsList.push(friendship.friend1.id === id ? friendship.friend2 : friendship.friend1);
+        })
+        return friendsList;
+      }
     }
   }
 });

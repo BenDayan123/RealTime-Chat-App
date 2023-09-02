@@ -27,10 +27,29 @@ model User {
     sessions      Session[]
     emailVerified DateTime?
     image         String?
-    // friends             User[]    @relation("friends", fields: [friendsIDs], references: [id])
-    // friendsIDs          String[]  @unique @db.ObjectId
-    // symmetricFriends    User[]    @relation("friends", fields: [symmetricFriendsIDs], references: [id])
-    // symmetricFriendsIDs String[]  @db.ObjectId
+
+    friends          Friendship[] @relation("friend1")
+    symmetricFriends Friendship[] @relation("friend2")
+    // friends             User[]   @relation("friends", fields: [friendsIDs], references: [id])
+    // friendsIDs          String[] @unique @db.ObjectId
+    // symmetricFriends    User[]   @relation("friends", fields: [symmetricFriendsIDs], references: [id])
+    // symmetricFriendsIDs String[] @db.ObjectId
+}
+
+model Friendship {
+    id String @id @default(auto()) @map("_id") @db.ObjectId
+
+    friend1   User          @relation("friend1", fields: [friend1ID], references: [id])
+    friend1ID String        @db.ObjectId
+    friend2   User          @relation("friend2", fields: [friend2ID], references: [id])
+    friend2ID String        @db.ObjectId
+    status    RequestStatus @default(PENDING)
+}
+
+enum RequestStatus {
+    PENDING
+    ACCEPTED
+    DENIND
 }
 
 model Account {

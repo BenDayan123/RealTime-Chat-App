@@ -3,13 +3,14 @@
 import { useCallback, useEffect, useState } from "react";
 import { MdPeopleAlt } from "react-icons/md";
 import { useSession } from "next-auth/react";
-import { IFriend } from "@interfaces/user";
+import { IFriend, IStatus } from "@interfaces/user";
 import ConversationTab from "@components/conversationTab";
 import { usePusher } from "@harelpls/use-pusher";
 import Item from "./item";
+import { Events } from "@lib/events";
 
 interface WatchListEvent {
-  name: "online" | "offline";
+  name: IStatus;
   user_ids: string[];
 }
 
@@ -24,7 +25,7 @@ const SideBar: React.FC = () => {
     fetch(`/api/user/${session?.user.id}/friends`)
       .then((res) => res.json())
       .then((body) => setFriends(body));
-  }, []);
+  });
 
   const watchlistEventHandler = useCallback((event: WatchListEvent) => {
     const { name, user_ids } = event;
@@ -37,9 +38,16 @@ const SideBar: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    pusher?.bind(Events.FRIEND_REQUEST, (data: any) =>
+      alert(JSON.stringify(data, null, 2))
+    );
     pusher?.user.watchlist.bind("online", watchlistEventHandler);
     pusher?.user.watchlist.bind("offline", watchlistEventHandler);
-  }, [pusher]);
+
+    return () => {
+      pusher?.unbind_all();
+    };
+  }, [pusher,watchlistEventHandler]);
 
   return (
     <div id="sidebar" className="bg-surface-light dark:bg-surface-dark">
@@ -49,20 +57,21 @@ const SideBar: React.FC = () => {
         </Item>
       </ul>
       <div className="flex flex-col gap-1 p-3 overflow-auto">
-        {friends?.map((friend) => {
-          const { image, name, id, status } = friend;
-          return (
-            <ConversationTab
-              key={id}
-              id={id}
-              image={image}
-              name={name}
-              time="02:31 PM"
-              status={status}
-              lastStatus={status || "Loading...."}
-            />
-          );
-        })}
+        {friends &&
+          friends.map((friend) => {
+            const { image, name, id, status } = friend;
+            return (
+              <ConversationTab
+                key={id}
+                id={id}
+                image={image}
+                name={name}
+                time="02:31 PM"
+                status={status}
+                lastStatus={status || "offline"}
+              />
+            );
+          })}
       </div>
     </div>
   );

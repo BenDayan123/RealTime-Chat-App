@@ -1,13 +1,21 @@
+import { cn } from "@lib/utils";
+
 interface Props {
   size: number | string;
+  fill?: string;
 }
 
-const LoadingSpinner: React.FC<Props> = ({ size }) => {
+const LoadingSpinner: React.FC<Props> = ({
+  size = "w-7 h-7",
+  fill = "fill-blue-600",
+}) => {
   return (
     <div role="status">
       <svg
         aria-hidden="true"
-        className={`w-${size} h-${size} mr-2 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600`}
+        className={cn(
+          `${size} inline mr-2 text-gray-200 animate-spin dark:text-gray-600 ${fill}`
+        )}
         viewBox="0 0 100 101"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"

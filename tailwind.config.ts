@@ -12,12 +12,12 @@ const config: Config = {
       colors:{
         tran: "transparent",
         background: {
-          light: "#ffffff",
-          dark: "#121212"
+          light: "#fefefe",
+          dark: "#232627"
         },
         surface: {
-          light: "#f5f7fb",
-          dark: "#1e1e1e"
+          light: "#f5f5f5",
+          dark: "#141718"
         },
         primary: {
           light: "#6200ee",
@@ -46,7 +46,8 @@ const config: Config = {
         error:{
           light: "#B00020",
           dark: "#CF6679"
-        }
+        },
+        active: "#0084ff"
       },
       fontFamily: {
         sans: ['var(--font-inter)'],

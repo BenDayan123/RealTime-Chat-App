@@ -11,7 +11,7 @@ export const Providers: React.FC<PropsWithChildren> = ({ children }) => {
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     update().then(() => setLoading(false));
-  }, []);
+  }, [update]);
 
   if (loading) return null;
 

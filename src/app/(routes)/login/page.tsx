@@ -7,9 +7,9 @@ export default function LoginPage() {
     <div className="flex w-screen">
       <div className="gradient-background relative h-screen w-full basis-2/3 max-md:hidden"></div>
       <Form title="Log in">
-        <Input name="username" icon={MdAccountCircle} />
-        <Input name="email" icon={MdEmail} />
-        <Input name="password" icon={MdOutlineLock} />
+        <Input name="username" icon={MdAccountCircle} type="text" />
+        <Input name="email" icon={MdEmail} type="email" />
+        <Input name="password" icon={MdOutlineLock} type="password" />
       </Form>
     </div>
   );

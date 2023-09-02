@@ -4,7 +4,7 @@
 
 import { PropsWithChildren } from "react";
 import SocialButton from "@components/buttons/social";
-import SubmitButton from "./button";
+import SubmitButton from "@components/buttons/button";
 import GoogleLogo from "@images/logos/google.svg";
 import TwitterLogo from "@images/logos/twitter.svg";
 import MetaLogo from "@images/logos/meta.svg";
@@ -22,7 +22,7 @@ const Form: React.FC<PropsWithChildren<Props>> = ({ children, title }) => {
     const formDataObj = Object.fromEntries(formData.entries());
     signIn("credentials", {
       ...formDataObj,
-      callbackUrl: `${window.location.origin}/chat`,
+      callbackUrl: `${window.location.origin}/app/chat/`,
     });
   }
   return (
@@ -43,7 +43,7 @@ const Form: React.FC<PropsWithChildren<Props>> = ({ children, title }) => {
         </div>
         <form className="w-full" onSubmit={handleSubmit}>
           {children}
-          <SubmitButton name="Sign In" />
+          <SubmitButton type="submit">Sign In</SubmitButton>
         </form>
       </div>
     </div>

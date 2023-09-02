@@ -7,7 +7,7 @@ import ProfileStatus from "./profileStatus";
 interface Props {
   name: string;
   lastStatus: string;
-  time: string;
+  time?: string;
   image: string;
   id: string;
   status?: "online" | "offline";
@@ -41,9 +41,11 @@ const ConversationTab: React.FC<Props> = ({
           {lastStatus}
         </p>
       </div>
-      <p className="text-onSurface-light dark:text-onSurface-dark opacity-70 text-sm">
-        {time}
-      </p>
+      {time && (
+        <p className="text-onSurface-light dark:text-onSurface-dark opacity-70 text-sm">
+          {time}
+        </p>
+      )}
     </div>
   );
 };

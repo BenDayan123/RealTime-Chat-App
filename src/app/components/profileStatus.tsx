@@ -17,8 +17,8 @@ const ProfileStatus: React.FC<Props> = ({ status, ...rest }) => {
       {status && (
         <div
           className={cn(
-            "absolute bottom-0 right-0 w-4 h-4 rounded-full border-[0px] border-background-dark",
-            status === "online" ? "bg-green-500" : "bg-gray-500"
+            "absolute -bottom-1 -right-1 w-4 aspect-square rounded-full border-[3px] border-surface-dark",
+            status === "online" ? "bg-[#46dc7c]" : "bg-gray-500"
           )}
         ></div>
       )}

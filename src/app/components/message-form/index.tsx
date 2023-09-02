@@ -6,9 +6,7 @@ import RecordButton from "./recorder";
 import TextareaAutosize from "react-textarea-autosize";
 import EmojiPicker from "emoji-picker-react";
 import { MdEmojiEmotions, MdSend } from "react-icons/md";
-
-// import EmojiEmotions from "@mui/icons-material/EmojiEmotions";
-// import Send from "@mui/icons-material/Send";
+import { cn } from "@lib/utils";
 
 interface Props {
   id: string;
@@ -17,10 +15,6 @@ interface Props {
 const MessageForm: React.FC<Props> = ({ id }) => {
   const [text, setText] = useState("");
   const [showEmojis, setEmojis] = useState(false);
-
-  // useEffect(() => {
-  //   console.log({ members });
-  // }, [members]);
 
   function handleSend() {
     axios.post("/api/message", { text, roomID: `presence-room-${id}` });
@@ -53,18 +47,19 @@ const MessageForm: React.FC<Props> = ({ id }) => {
         placeholder="Type a message..."
         className="resize-none w-full h-full px-3 outline-none bg-tran text-onBG-light dark:text-onBG-dark"
       />
-      <i onClick={EmojiToggle}>
+      <i onClick={EmojiToggle} className="group">
         <MdEmojiEmotions
-          className="fill-onBG-light dark:fill-onBG-dark opacity-60 cursor-pointer"
+          className="fill-onBG-light dark:fill-onBG-dark opacity-60 group-hover:fill-active group-hover:opacity-100 cursor-pointer"
           size={25}
         />
       </i>
-      <i onClick={handleSend}>
+      <i onClick={handleSend} className="group">
         <MdSend
           size={25}
-          className={`fill-onBG-light dark:fill-onBG-dark opacity-60 cursor-pointer ${
-            text === "" ? "opacity-10 pointer-events-none" : ""
-          }`}
+          className={cn(
+            "fill-onBG-light dark:fill-onBG-dark opacity-60 group-hover:fill-active group-hover:opacity-100 cursor-pointer",
+            text === "" && "opacity-10 pointer-events-none"
+          )}
         />
       </i>
       {showEmojis && (

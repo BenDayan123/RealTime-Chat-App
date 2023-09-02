@@ -15,11 +15,19 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60
   },
-  adapter: PrismaAdapter(prisma as any) as any,
+  // adapter: PrismaAdapter(prisma) as any,
   providers: [
     GoogleProvider({
       clientId: GOOGLE_CLIENT_ID,
       clientSecret: GOOGLE_CLIENT_SECRET,
+      profile(profile){
+        return {
+          id: profile.sub,
+          name: profile.name,
+          email: profile.email,
+          image: profile.picture.replace(/s=\d+/, "s=600"),
+        }
+      },
       checks: ["none"]
     }),
     CredentialsProvider({

@@ -1,6 +1,5 @@
 "use client";
 
-// import KeyboardVoice from "@mui/icons-material/KeyboardVoice";
 import { useEffect, useState } from "react";
 import { MdKeyboardVoice } from "react-icons/md";
 
@@ -47,9 +46,13 @@ const RecordButton: React.FC = () => {
 
   return (
     <>
-      <i onMouseDown={handleRecording} onMouseUp={handleRecording}>
+      <i
+        onMouseDown={handleRecording}
+        onMouseUp={handleRecording}
+        className="group"
+      >
         <MdKeyboardVoice
-          className="fill-onBG-light dark:fill-onBG-dark active:scale-90 cursor-pointer opacity-60"
+          className="fill-onBG-light dark:fill-onBG-dark active:scale-90 group-hover:fill-active group-hover:opacity-100 cursor-pointer opacity-60"
           size={25}
         />
       </i>
