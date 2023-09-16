@@ -13,22 +13,22 @@ const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, NEXTAUTH_SECRET } = process.env;
 export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60
+    maxAge: 30 * 24 * 60 * 60,
   },
-  // adapter: PrismaAdapter(prisma) as any,
+  adapter: PrismaAdapter(prisma as any) as any,
   providers: [
     GoogleProvider({
       clientId: GOOGLE_CLIENT_ID,
       clientSecret: GOOGLE_CLIENT_SECRET,
-      profile(profile){
+      profile(profile) {
         return {
           id: profile.sub,
           name: profile.name,
           email: profile.email,
           image: profile.picture.replace(/s=\d+/, "s=600"),
-        }
+        };
       },
-      checks: ["none"]
+      checks: ["none"],
     }),
     CredentialsProvider({
       type: "credentials",
@@ -50,7 +50,7 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user, trigger, session }) {
       // if(trigger === "update"){
-      //   return { ...token, ...session }; 
+      //   return { ...token, ...session };
       // }
       return { ...token, ...user };
     },
@@ -61,7 +61,7 @@ export const authOptions: NextAuthOptions = {
   },
   jwt: {
     secret: NEXTAUTH_SECRET,
-    maxAge: 30 * 24 * 60 * 60
+    maxAge: 30 * 24 * 60 * 60,
   },
   secret: NEXTAUTH_SECRET,
 };

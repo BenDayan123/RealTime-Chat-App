@@ -27,7 +27,11 @@ const NextAuthProvider = ({ children, session }: Props) => {
   );
 
   return (
-    <SessionProvider session={session}>
+    <SessionProvider
+      session={session}
+      refetchOnWindowFocus={false}
+      refetchWhenOffline={false}
+    >
       <QueryClientProvider client={queryClient}>
         <Hydrate>{children}</Hydrate>
       </QueryClientProvider>

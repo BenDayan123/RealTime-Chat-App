@@ -1,47 +1,34 @@
 "use client";
 
-import ConversationTab from "@components/conversationTab";
-import Message from "@components/message";
+import ConversationTab from "@components/ConversationTab";
+import Message from "@components/Message";
 import MessageForm from "@components/message-form";
-import { useEvent, usePresenceChannel, usePusher } from "@harelpls/use-pusher";
-import { IMessage } from "@interfaces/message";
-import { useEffect, useState } from "react";
+import { usePresenceChannel } from "@harelpls/use-pusher";
+import { useMessages } from "@hooks/useMessages";
+import { useSession } from "next-auth/react";
 
 export default function ChatApp({
   params: { id },
 }: {
   params: { id: string };
 }) {
-  const [messages, setMessages] = useState<IMessage[]>([]);
-  const { channel, myID, members } = usePresenceChannel(`presence-room-${id}`);
-  const { client: pusher } = usePusher();
-
-  useEffect(() => {
-    pusher?.signin();
-  }, [pusher]);
-
-  useEvent<IMessage>(channel, "new-message", (data) => {
-    console.log(data);
-    data && setMessages((prev) => [...prev, data]);
-  });
+  const { data: messages } = useMessages(id);
+  const { members } = usePresenceChannel(`presence-room@${id}`);
+  const { data: session } = useSession();
 
   return (
     <div className="max-h-full h-full flex flex-col">
       <h1 className="text-onBG-light my-5 dark:text-onBG-dark text-center text-4xl">
         Chat ID: {id}
       </h1>
-      <h1 className="text-onBG-light dark:text-onBG-dark opacity-70 text-center text-2xl">
-        My ID: {myID}
-      </h1>
       <div className="h-full flex flex-col gap-3 p-6 overflow-auto">
-        {messages.map((message, i) => {
-          const { id, body, sender } = message;
+        {messages?.map((message) => {
+          const { body, from, id } = message;
           return (
             <Message
-              mine
-              // mine={id === pusher?.connection.socket_id}
-              key={i}
-              sender={sender}
+              mine={from.id === session?.user.id}
+              key={id}
+              sender={from.name}
             >
               {body}
             </Message>
@@ -50,7 +37,7 @@ export default function ChatApp({
       </div>
       {members &&
         Object.entries(members).map(([id, info]) => {
-          const { name, image, email } = info;
+          const { name, image, email } = info as any;
           return (
             <ConversationTab
               key={id}

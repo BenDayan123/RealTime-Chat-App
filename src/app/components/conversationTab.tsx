@@ -1,8 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import { useRouter } from "next/navigation";
-import ProfileStatus from "./profileStatus";
+import ProfileStatus from "./ProfileStatus";
+import { cn } from "@lib/utils";
+import { useFriend } from "@hooks/useFriends";
+import { IStatus } from "@interfaces/user";
 
 interface Props {
   name: string;
@@ -10,7 +12,8 @@ interface Props {
   time?: string;
   image: string;
   id: string;
-  status?: "online" | "offline";
+  className?: string;
+  status?: IStatus;
 }
 
 const ConversationTab: React.FC<Props> = ({
@@ -18,13 +21,18 @@ const ConversationTab: React.FC<Props> = ({
   id,
   image,
   lastStatus,
+  className,
   status,
   time,
 }) => {
   const router = useRouter();
+  const { acceptRequest } = useFriend();
   return (
     <div
-      className="flex justify-around items-center py-3 overflow-hidden select-none rounded-lg px-5 gap-4 hover:bg-background-light cursor-pointer hover:dark:bg-background-dark"
+      className={cn(
+        "relative flex justify-around items-center py-2 px-5 my-1 overflow-hidden select-none rounded-lg gap-4 cursor-pointer",
+        className
+      )}
       onClick={() => router.push(`/app/chat/${id}`)}
     >
       <ProfileStatus

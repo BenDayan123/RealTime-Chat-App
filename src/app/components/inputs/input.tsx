@@ -12,13 +12,10 @@ interface Props
 const Input = React.forwardRef<HTMLInputElement, Props>((props, ref) => {
   const { name, icon: Icon, ...rest } = props;
   return (
-    <div
-      className="relative group mt-4 flex items-center overflow-hidden shadow-lg rounded-lg border-2 border-tran bg-surface-light
-     text-onSurface-light focus-within:border-blue-500 dark:bg-surface-dark dark:shadow-none dark:text-onSurface-dark"
-    >
+    <div className="relative group mt-4 flex items-center overflow-hidden shadow-lg rounded-lg border-2 border-tran bg-surface-light text-onSurface-light focus-within:border-blue-500 dark:bg-surface-dark dark:shadow-none dark:text-onSurface-dark">
       {Icon && (
         <Icon
-          className="group-focus-within:fill-blue-500 mx-3 transition-none"
+          className="group-focus-within:fill-blue-500 fill-surface-dark dark:fill-surface-light mx-3 transition-none"
           size={30}
         />
       )}

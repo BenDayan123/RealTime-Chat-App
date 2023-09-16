@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Sora } from "next/font/google";
 
 const font = Sora({
@@ -11,11 +11,16 @@ const font = Sora({
 export default function App({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState("dark");
   const isDark = useMemo(() => theme === "dark", [theme]);
+
+  useEffect(() => {
+    Notification.requestPermission();
+  }, []);
+
   return (
     <html lang="en" className={`${font.className} ${theme}`}>
       <body suppressHydrationWarning={true}>
         <button
-          className="absolute left-0 bottom-0 z-10 m-5 cursor-pointer rounded-circle bg-surface-dark p-4 dark:bg-surface-light"
+          className="absolute right-0 top-0 z-10 m-5 cursor-pointer rounded-circle bg-surface-dark p-4 dark:bg-surface-light"
           onClick={() => setTheme(isDark ? "light" : "dark")}
         >
           {isDark ? "🌑" : "☀️"}

@@ -1,78 +1,53 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
 import { MdPeopleAlt } from "react-icons/md";
-import { useSession } from "next-auth/react";
-import { IFriend, IStatus } from "@interfaces/user";
-import ConversationTab from "@components/conversationTab";
-import { usePusher } from "@harelpls/use-pusher";
+import ConversationTab from "@components/ConversationTab";
 import Item from "./item";
-import { Events } from "@lib/events";
-
-interface WatchListEvent {
-  name: IStatus;
-  user_ids: string[];
-}
+import { useFriends } from "@hooks/useFriends";
+import { useSession } from "next-auth/react";
+import { useConversions } from "@hooks/useConversions";
 
 const SideBar: React.FC = () => {
-  const { data: session } = useSession();
-  const { client: pusher } = usePusher();
-  // const queryClient = useQueryClient();
-  // const key = ["friends", session?.user.id];
-  const [friends, setFriends] = useState<IFriend[]>([]);
-
-  useEffect(() => {
-    fetch(`/api/user/${session?.user.id}/friends`)
-      .then((res) => res.json())
-      .then((body) => setFriends(body));
-  });
-
-  const watchlistEventHandler = useCallback((event: WatchListEvent) => {
-    const { name, user_ids } = event;
-    setFriends((old) => {
-      return old?.map((friend: any) => {
-        if (user_ids.includes(friend.id)) friend.status = name;
-        return friend;
-      });
-    });
-  }, []);
-
-  useEffect(() => {
-    pusher?.bind(Events.FRIEND_REQUEST, (data: any) =>
-      alert(JSON.stringify(data, null, 2))
-    );
-    pusher?.user.watchlist.bind("online", watchlistEventHandler);
-    pusher?.user.watchlist.bind("offline", watchlistEventHandler);
-
-    return () => {
-      pusher?.unbind_all();
-    };
-  }, [pusher,watchlistEventHandler]);
-
+  const { data: conversions } = useConversions();
+  const { data: friends } = useFriends({ status: "ACCEPTED" });
+  const { data } = useSession();
   return (
-    <div id="sidebar" className="bg-surface-light dark:bg-surface-dark">
+    <div
+      id="sidebar"
+      className="bg-surface-light dark:bg-surface-dark flex flex-col"
+    >
       <ul className="p-3">
         <Item icon={MdPeopleAlt} navTo="/app/friends">
           Friends
         </Item>
       </ul>
-      <div className="flex flex-col gap-1 p-3 overflow-auto">
-        {friends &&
-          friends.map((friend) => {
-            const { image, name, id, status } = friend;
+      <div className="p-3 h-full overflow-y-auto max-h-full">
+        {conversions &&
+          conversions.map((conversion) => {
+            const { id, is_group, title, members, profile, createdAt } =
+              conversion;
+            const image = profile || members[0].image;
+            const name = is_group ? title : members[0].name;
             return (
               <ConversationTab
+                className="bg-surface-light dark:bg-surface-dark"
                 key={id}
                 id={id}
                 image={image}
                 name={name}
-                time="02:31 PM"
-                status={status}
+                time={createdAt.substring(11, 16)}
+                status={"offline"}
                 lastStatus={status || "offline"}
               />
             );
           })}
       </div>
+      <ConversationTab
+        id={data?.user.id || ""}
+        image={data?.user.image || ""}
+        name={data?.user.name || ""}
+        lastStatus="Your Profile"
+      />
     </div>
   );
 };

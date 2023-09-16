@@ -7,6 +7,8 @@ import TextareaAutosize from "react-textarea-autosize";
 import EmojiPicker from "emoji-picker-react";
 import { MdEmojiEmotions, MdSend } from "react-icons/md";
 import { cn } from "@lib/utils";
+import { useChannel, useClientTrigger } from "@harelpls/use-pusher";
+import { useSession } from "next-auth/react";
 
 interface Props {
   id: string;
@@ -14,10 +16,17 @@ interface Props {
 
 const MessageForm: React.FC<Props> = ({ id }) => {
   const [text, setText] = useState("");
+  const { data: session } = useSession();
   const [showEmojis, setEmojis] = useState(false);
+  const channel = useChannel(`presence-room@${id}`);
+  const trigger = useClientTrigger(channel);
 
   function handleSend() {
-    axios.post("/api/message", { text, roomID: `presence-room-${id}` });
+    axios.post("/api/message", {
+      body: text,
+      channel_name: `presence-room@${id}`,
+      sender_id: session?.user.id,
+    });
     setText("");
   }
 

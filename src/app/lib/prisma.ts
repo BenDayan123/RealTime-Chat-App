@@ -1,48 +1,83 @@
+import { FriendShipStatus } from "@interfaces/user";
 import { PrismaClient } from "@prisma/client";
 
-const globalForPrisma = global as unknown as { prisma: PrismaClient }
-// globalForPrisma.prisma || 
-export const prisma = new PrismaClient({ log: ["warn"] })
-.$extends({
-  query:{
-    user:{}
-  },
-  model:{
-    user:{
-      async getFriends(id: string){
-        const user = await prisma.user.findUnique({
-          where: { id },
-          include:{
-            friends: {
-              where:{
-                status: "PENDING"
-              },
-              include: {
-                friend1: true,
-                friend2: true,
-              }
+const globalForPrisma = global as unknown as { prisma: PrismaClient };
+// globalForPrisma.prisma ||
+export const prisma = new PrismaClient({ log: ["warn"] }).$extends({
+  query: {
+    friendship: {
+      async update({ args, query }) {
+        const friendship = await query(args);
+        const { requestedFromID, requestedToID, status } = friendship;
+        console.log("update: ", status);
+        if (status !== "ACCEPTED") return friendship;
+        await prisma.conversion.create({
+          data: {
+            members: {
+              connect: [{ id: requestedFromID }, { id: requestedToID }],
             },
-            symmetricFriends: {
-              where:{
-                status: "PENDING"
-              },
-              include: {
-                friend1: true,
-                friend2: true,
-              }
-            },
-          }
+          },
         });
-        if(!user) return [];
-        const { friends, symmetricFriends } = user;
-        const friendsList:any = [];
-        [...friends, ...symmetricFriends].map((friendship) => {
-          friendsList.push(friendship.friend1.id === id ? friendship.friend2 : friendship.friend1);
-        })
-        return friendsList;
-      }
-    }
-  }
+        return friendship;
+      },
+    },
+  },
+  model: {
+    user: {
+      async getFriends(id: string, status?: FriendShipStatus) {
+        const friendships = await prisma.friendship.findMany({
+          where: {
+            OR: [
+              { ...(status === "ACCEPTED" && { requestedFromID: id }) },
+              { requestedToID: id },
+            ],
+            status,
+          },
+          select: {
+            requestedFrom: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                image: true,
+              },
+            },
+            requestedTo: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                image: true,
+              },
+            },
+          },
+        });
+        return friendships.map((friendship) =>
+          friendship.requestedFrom.id === id
+            ? friendship.requestedTo
+            : friendship.requestedFrom
+        );
+      },
+    },
+    friendship: {
+      async findFriendship(myID: string, friendID: string) {
+        return await prisma.friendship.findFirst({
+          where: {
+            OR: [
+              {
+                requestedToID: myID,
+                requestedFromID: friendID,
+              },
+              {
+                requestedToID: friendID,
+                requestedFromID: myID,
+              },
+            ],
+          },
+        });
+      },
+    },
+  },
 });
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma;
