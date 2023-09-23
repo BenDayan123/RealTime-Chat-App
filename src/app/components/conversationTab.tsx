@@ -1,9 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import ProfileStatus from "./ProfileStatus";
 import { cn } from "@lib/utils";
-import { useFriend } from "@hooks/useFriends";
 import { IStatus } from "@interfaces/user";
 
 interface Props {
@@ -12,6 +11,7 @@ interface Props {
   time?: string;
   image: string;
   id: string;
+  unseenCount?: number;
   className?: string;
   status?: IStatus;
 }
@@ -24,14 +24,17 @@ const ConversationTab: React.FC<Props> = ({
   className,
   status,
   time,
+  unseenCount,
 }) => {
   const router = useRouter();
-  const { acceptRequest } = useFriend();
+  const pathname = usePathname();
   return (
     <div
       className={cn(
         "relative flex justify-around items-center py-2 px-5 my-1 overflow-hidden select-none rounded-lg gap-4 cursor-pointer",
-        className
+        className,
+        pathname === `/app/chat/${id}` &&
+          "bg-background-light dark:bg-background-dark"
       )}
       onClick={() => router.push(`/app/chat/${id}`)}
     >
@@ -49,11 +52,18 @@ const ConversationTab: React.FC<Props> = ({
           {lastStatus}
         </p>
       </div>
-      {time && (
-        <p className="text-onSurface-light dark:text-onSurface-dark opacity-70 text-sm">
-          {time}
-        </p>
-      )}
+      <div className="flex flex-col items-center gap-1">
+        {time && (
+          <p className="text-onSurface-light dark:text-onSurface-dark opacity-70 text-sm">
+            {time}
+          </p>
+        )}
+        {!!unseenCount && unseenCount > 0 && (
+          <div className="text-white bg-red-500 aspect-square rounded-full p-1 h-5 w-5 text-[.6em] text-center">
+            {unseenCount}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

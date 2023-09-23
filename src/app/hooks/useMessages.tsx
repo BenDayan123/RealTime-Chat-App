@@ -1,5 +1,6 @@
 import { useEvent, useChannel } from "@harelpls/use-pusher";
 import { IMessage } from "@interfaces/message";
+import { Events } from "@lib/events";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { useSession } from "next-auth/react";
@@ -22,11 +23,21 @@ export function useMessages(channel_id: string) {
     queryFn: () => fetchMessages(channel_id),
   });
 
-  useEvent<IMessage>(channel, "new-message-channel", (data) => {
+  useEvent<IMessage>(channel, Events.NEW_CHANNEL_MESSAGE, (data) => {
     queryClient.setQueryData(key, (old: any) => {
       return data ? [...old, data] : old;
     });
   });
 
+  useEvent<{ messages: string[] }>(channel, Events.MESSAGE_SEEN, (data) => {
+    if (!data) return;
+    const { messages } = data;
+    queryClient.setQueryData(key, (old: any) => {
+      return old.map((message: any) => ({
+        ...message,
+        seen: messages.includes(message.id) ? true : message.seen,
+      }));
+    });
+  });
   return query;
 }

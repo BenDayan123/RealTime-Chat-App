@@ -14,5 +14,6 @@ export function useConversions() {
     queryKey: ["conversions", session?.user.id],
     queryFn: () => fetchConversions(session?.user.id as string),
   });
+
   return query;
 }

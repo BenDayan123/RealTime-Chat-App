@@ -10,6 +10,7 @@ import { PusherProvider, usePusher } from "@harelpls/use-pusher";
 import { useSession } from "next-auth/react";
 import { getPusher } from "@lib/socket";
 import "./style.scss";
+import { useConversions } from "@hooks/useConversions";
 
 interface WatchListEvent {
   name: IStatus;
@@ -20,11 +21,11 @@ function ChatLayout({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession();
   const { client: pusher } = usePusher();
   const queryClient = useQueryClient();
+  const { data: chats } = useConversions();
   const { key } = useFriends({ status: "ACCEPTED" });
 
   const watchlistEventHandler = useCallback((event: WatchListEvent) => {
     const { name, user_ids } = event;
-    console.log({ event });
     queryClient.setQueryData<IFriend[]>(key, (old) => {
       return old?.map((friend: any) => {
         if (user_ids.includes(friend.id)) friend.status = name;
@@ -34,11 +35,9 @@ function ChatLayout({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    pusher?.signin();
-  }, [pusher]);
-
-  useEffect(() => {
     if (!pusher) return;
+    pusher?.signin();
+
     pusher.user.bind(Events.FRIEND_REQUEST, (request: any) => {
       queryClient.setQueryData<IFriend[]>(
         ["friends", "PENDING", session?.user.id],
@@ -59,7 +58,15 @@ function ChatLayout({ children }: { children: React.ReactNode }) {
     pusher.user.watchlist.bind("online", watchlistEventHandler);
     pusher.user.watchlist.bind("offline", watchlistEventHandler);
 
+    chats?.map((chat) => {
+      const channel = pusher.subscribe(`presence-room@${chat.id}`);
+      channel.bind(Events.NEW_CHANNEL_MESSAGE, (data: any) =>
+        console.warn(data)
+      );
+    });
+
     return () => {
+      chats?.map((chat) => pusher.unsubscribe(`presence-room@${chat.id}`));
       pusher.user.unbind_all();
     };
   }, [pusher]);

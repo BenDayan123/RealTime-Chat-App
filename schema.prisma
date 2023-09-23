@@ -9,12 +9,13 @@ generator client {
 }
 
 model Message {
-    id        String     @id @default(uuid())
+    id        String     @id @default(cuid())
     body      String
     from      User       @relation(fields: [fromID], references: [id])
     fromID    String
     chat      Conversion @relation(fields: [chatID], references: [id], onDelete: Cascade)
     chatID    String
+    seen      Boolean    @default(false)
     createdAt DateTime   @default(now())
     updatedAt DateTime   @updatedAt
 }

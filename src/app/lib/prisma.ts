@@ -1,9 +1,10 @@
 import { FriendShipStatus } from "@interfaces/user";
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
 // globalForPrisma.prisma ||
-export const prisma = new PrismaClient({ log: ["warn"] }).$extends({
+const prismaClient = new PrismaClient({ log: ["warn"] });
+export const prisma = prismaClient.$extends({
   query: {
     friendship: {
       async update({ args, query }) {

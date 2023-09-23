@@ -14,11 +14,17 @@ export async function GET(_: NextRequest, { params }: { params: Params }) {
     },
     include: {
       members: true,
+      _count: {
+        select: {
+          messages: { where: { seen: false, fromID: { not: id } } },
+        },
+      },
     },
   });
   return NextResponse.json(
-    conversions.map((conversion) => ({
+    conversions.map(({ _count, ...conversion }) => ({
       ...conversion,
+      unseenCount: _count.messages,
       members: conversion.members.filter((memeber) => memeber.id !== id),
     }))
   );

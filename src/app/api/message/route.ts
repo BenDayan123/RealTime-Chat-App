@@ -1,3 +1,4 @@
+import { Events } from "@lib/events";
 import { prisma } from "@lib/prisma";
 import { NextResponse } from "next/server";
 import Pusher from "pusher";
@@ -50,7 +51,7 @@ export async function POST(req: Request) {
       from: true,
     },
   });
-  pusher.trigger(channel_name, "new-message-channel", message);
+  pusher.trigger(channel_name, Events.NEW_CHANNEL_MESSAGE, message);
   return NextResponse.json({ success: true });
 }
 

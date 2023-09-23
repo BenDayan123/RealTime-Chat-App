@@ -3,9 +3,10 @@ import { IUser } from "./user";
 export interface IMessage {
   body: string;
   chatID: string;
-  createdAt: Date | string;
+  createdAt: string;
   from: IUser;
+  seen: boolean;
   fromID: string;
   id: string;
-  updatedAt: Date | string;
+  updatedAt: string;
 }

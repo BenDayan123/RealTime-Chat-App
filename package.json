@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prisma:studio": "prisma studio",
     "prisma:build": "prisma generate",
     "prisma:push": "prisma db push",
-    "prisma:format": "prisma format",
+    "prisma:migrate": "prisma migrate",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -37,6 +38,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^4.10.1",
+    "react-intersection-observer": "^9.5.2",
     "react-textarea-autosize": "^8.5.2",
     "sass": "^1.65.1",
     "tailwindcss": "3.3.3",

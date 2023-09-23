@@ -5,11 +5,14 @@ interface Props extends ImageProps {
   status?: "online" | "offline";
 }
 
-const ProfileStatus: React.FC<Props> = ({ status, ...rest }) => {
+const ProfileStatus: React.FC<Props> = ({ status, ...props }) => {
+  const { className, ...rest } = props;
   return (
-    <div className="relative bg-inherit transition-none">
+    <div className={cn("relative bg-inherit transition-none", className)}>
       <Image
-        className="rounded-full aspect-square object-cover"
+        className={
+          "rounded-full aspect-square object-cover pointer-events-none"
+        }
         width={50}
         height={50}
         {...rest}

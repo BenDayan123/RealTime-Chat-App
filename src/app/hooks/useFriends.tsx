@@ -56,5 +56,6 @@ export function useFriend() {
       },
     }
   );
+
   return { acceptRequest, isLoading, error, data };
 }

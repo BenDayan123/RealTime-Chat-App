@@ -7,4 +7,5 @@ export interface IConversion {
   profile?: string;
   createdAt: string;
   title: string;
+  unseenCount: number;
 }

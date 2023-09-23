@@ -9,6 +9,7 @@ import { MdEmojiEmotions, MdSend } from "react-icons/md";
 import { cn } from "@lib/utils";
 import { useChannel, useClientTrigger } from "@harelpls/use-pusher";
 import { useSession } from "next-auth/react";
+import { Events } from "@lib/events";
 
 interface Props {
   id: string;
@@ -16,12 +17,15 @@ interface Props {
 
 const MessageForm: React.FC<Props> = ({ id }) => {
   const [text, setText] = useState("");
-  const { data: session } = useSession();
   const [showEmojis, setEmojis] = useState(false);
+  const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(
+    null
+  );
+  const { data: session } = useSession();
   const channel = useChannel(`presence-room@${id}`);
-  const trigger = useClientTrigger(channel);
+  const triggerEvent = useClientTrigger(channel);
 
-  function handleSend() {
+  function SendMessage() {
     axios.post("/api/message", {
       body: text,
       channel_name: `presence-room@${id}`,
@@ -34,6 +38,32 @@ const MessageForm: React.FC<Props> = ({ id }) => {
     setEmojis(!showEmojis);
   }
 
+  function stopTypingHandler() {
+    setTypingTimeout(
+      setTimeout(() => {
+        setTypingTimeout(null);
+        triggerEvent(Events.USER_STOP_TYPING, {});
+      }, 1500)
+    );
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      triggerEvent(Events.USER_STOP_TYPING, {});
+      SendMessage();
+      return false;
+    }
+    if (!typingTimeout) {
+      triggerEvent(Events.USER_TYPEING, { user: session?.user });
+      stopTypingHandler();
+    } else {
+      clearTimeout(typingTimeout);
+      stopTypingHandler();
+    }
+    return true;
+  }
+
   return (
     <div
       className={`relative bg-surface-light px-6 py-4 gap-2 dark:bg-surface-dark rounded-md flex items-start border-blue-400 border-2 dark:border-opacity-0`}
@@ -44,14 +74,7 @@ const MessageForm: React.FC<Props> = ({ id }) => {
         minRows={1}
         rows={1}
         maxRows={10}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault();
-            handleSend();
-            return false;
-          }
-          return true;
-        }}
+        onKeyDown={handleKeyDown}
         onInput={(e) => setText(e.currentTarget.value)}
         placeholder="Type a message..."
         className="resize-none w-full h-full px-3 outline-none bg-tran text-onBG-light dark:text-onBG-dark"
@@ -62,7 +85,7 @@ const MessageForm: React.FC<Props> = ({ id }) => {
           size={25}
         />
       </i>
-      <i onClick={handleSend} className="group">
+      <i onClick={SendMessage} className="group">
         <MdSend
           size={25}
           className={cn(
