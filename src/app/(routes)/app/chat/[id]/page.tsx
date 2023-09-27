@@ -51,23 +51,26 @@ export default function ChatApp({ params: { id } }: Props) {
   useEffect(() => {
     const timeOutID = setTimeout(() => {
       if (batchedMessages.length > 0) {
-        axios.post("/api/message/seen", {
-          messages: batchedMessages,
-          socket_id: pusher?.connection.socket_id,
-          channel_id: channel?.name,
-        });
-        queryClient.setQueryData(
-          ["conversions", session?.user.id],
-          (old: any) => {
-            return old.map((chat: any) => ({
-              ...chat,
-              unseenCount:
-                chat.unseenCount - batchedMessages.length >= 0
-                  ? chat.unseenCount - batchedMessages.length
-                  : 0,
-            }));
-          }
-        );
+        axios
+          .post("/api/message/seen", {
+            messages: batchedMessages,
+            socket_id: pusher?.connection.socket_id,
+            channel_id: channel?.name,
+          })
+          .then((res) => {
+            queryClient.setQueryData(
+              ["conversions", session?.user.id],
+              (old: any) => {
+                return old.map((chat: any) => ({
+                  ...chat,
+                  unseenCount: Math.max(
+                    0,
+                    chat.unseenCount - batchedMessages.length
+                  ),
+                }));
+              }
+            );
+          });
         setBatchedMessages([]);
       }
     }, 700);
@@ -83,7 +86,7 @@ export default function ChatApp({ params: { id } }: Props) {
   return (
     <div className="max-h-full h-full flex flex-col">
       <div
-        className="h-full flex flex-col gap-2 p-6 pt-10 overflow-auto"
+        className="h-full flex flex-col gap-2 p-6 px-[15%] pt-10 overflow-auto"
         ref={chatContainer}
       >
         {messages?.map((message, i) => {
@@ -107,7 +110,7 @@ export default function ChatApp({ params: { id } }: Props) {
                 key={id}
                 seen={seen}
                 onView={(inView) => {
-                  if (inView && !seen && !mine)
+                  if (inView && !seen && !mine && !batchedMessages.includes(id))
                     setBatchedMessages((prev) => [...prev, id]);
                 }}
                 isConnected={

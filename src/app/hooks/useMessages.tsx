@@ -30,6 +30,7 @@ export function useMessages(channel_id: string) {
   });
 
   useEvent<{ messages: string[] }>(channel, Events.MESSAGE_SEEN, (data) => {
+    console.log(data);
     if (!data) return;
     const { messages } = data;
     queryClient.setQueryData(key, (old: any) => {

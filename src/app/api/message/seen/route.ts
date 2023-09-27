@@ -33,14 +33,13 @@ export async function POST(req: NextRequest) {
     },
   });
   if (query.count > 0) {
-    return NextResponse.json(
-      await pusher.trigger(
-        channel_id,
-        Events.MESSAGE_SEEN,
-        { messages },
-        { socket_id }
-      )
+    const res = await pusher.trigger(
+      channel_id,
+      Events.MESSAGE_SEEN,
+      { messages },
+      { socket_id }
     );
+    return NextResponse.json(res);
   }
   return NextResponse.json("all messages already been seen");
 }
