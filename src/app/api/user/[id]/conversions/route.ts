@@ -1,6 +1,5 @@
 import { prisma } from "@lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
-import url from "url";
 
 interface Params {
   id: string;
@@ -12,20 +11,16 @@ export async function GET(_: NextRequest, { params }: { params: Params }) {
     where: {
       members: { some: { id } },
     },
-    include: {
-      members: true,
-      _count: {
-        select: {
-          messages: { where: { seen: false, fromID: { not: id } } },
-        },
-      },
+    select: {
+      id: true,
     },
   });
-  return NextResponse.json(
-    conversions.map(({ _count, ...conversion }) => ({
-      ...conversion,
-      unseenCount: _count.messages,
-      members: conversion.members.filter((memeber) => memeber.id !== id),
-    }))
-  );
+  return NextResponse.json(conversions.map((chat) => chat.id));
 }
+
+// conversions.map(({ _count, messages, ...conversion }) => ({
+//   ...conversion,
+//   unseenCount: _count.messages,
+//   lastAction: messages[0] || null,
+//   members: conversion.members.filter((memeber) => memeber.id !== id),
+// }))

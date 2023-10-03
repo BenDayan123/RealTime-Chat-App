@@ -21,20 +21,15 @@ export function useMessages(channel_id: string) {
   const query = useQuery({
     queryKey: key,
     queryFn: () => fetchMessages(channel_id),
-  });
-
-  useEvent<IMessage>(channel, Events.NEW_CHANNEL_MESSAGE, (data) => {
-    queryClient.setQueryData(key, (old: any) => {
-      return data ? [...old, data] : old;
-    });
+    initialData: [],
   });
 
   useEvent<{ messages: string[] }>(channel, Events.MESSAGE_SEEN, (data) => {
-    console.log(data);
     if (!data) return;
     const { messages } = data;
-    queryClient.setQueryData(key, (old: any) => {
-      return old.map((message: any) => ({
+    queryClient.setQueryData<IMessage[]>(key, (old) => {
+      if (!old) return old;
+      return old.map((message) => ({
         ...message,
         seen: messages.includes(message.id) ? true : message.seen,
       }));

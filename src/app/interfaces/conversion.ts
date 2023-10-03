@@ -8,4 +8,9 @@ export interface IConversion {
   createdAt: string;
   title: string;
   unseenCount: number;
+  liveAction?: string;
+  lastAction?: {
+    body: string;
+    updatedAt: string;
+  };
 }

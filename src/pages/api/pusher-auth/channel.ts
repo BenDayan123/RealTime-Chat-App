@@ -39,6 +39,7 @@ export default async function ChannelAuthPusherHandler(
   );
   return res.json(authResponse);
 }
+
 export const config = {
   api: {
     bodyParser: true,

@@ -54,14 +54,18 @@ const MessageForm: React.FC<Props> = ({ id }) => {
       SendMessage();
       return false;
     }
+    return true;
+  }
+
+  function handleInput(e: React.FormEvent<HTMLTextAreaElement>) {
+    setText(e.currentTarget.value);
     if (!typingTimeout) {
-      triggerEvent(Events.USER_TYPEING, { user: session?.user });
+      triggerEvent(Events.USER_TYPING, { name: session?.user.name });
       stopTypingHandler();
     } else {
       clearTimeout(typingTimeout);
       stopTypingHandler();
     }
-    return true;
   }
 
   return (
@@ -75,7 +79,7 @@ const MessageForm: React.FC<Props> = ({ id }) => {
         rows={1}
         maxRows={10}
         onKeyDown={handleKeyDown}
-        onInput={(e) => setText(e.currentTarget.value)}
+        onInput={handleInput}
         placeholder="Type a message..."
         className="resize-none w-full h-full px-3 outline-none bg-tran text-onBG-light dark:text-onBG-dark"
       />

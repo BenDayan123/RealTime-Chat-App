@@ -20,7 +20,7 @@ export default function App({ children }: { children: React.ReactNode }) {
     <html lang="en" className={`${font.className} ${theme}`}>
       <body suppressHydrationWarning={true}>
         <button
-          className="absolute right-0 top-0 z-10 m-5 cursor-pointer rounded-circle bg-surface-dark p-4 dark:bg-surface-light"
+          className="absolute right-0 top-0 z-20 m-5 cursor-pointer rounded-circle bg-surface-dark p-4 dark:bg-surface-light"
           onClick={() => setTheme(isDark ? "light" : "dark")}
         >
           {isDark ? "🌑" : "☀️"}

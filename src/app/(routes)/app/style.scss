@@ -5,14 +5,13 @@
     display: grid;
     overflow: hidden;
     grid-template: 
-    "side   main"
-    "player player";
+    "side   main";
     grid-template-columns: auto 1fr;
     grid-template-rows: minmax(0, 1fr);
     #sidebar{
         grid-area: side;
         height: 100%;
-        width: 20rem; 
+        width: 26rem; 
     }
     #main-window{
         grid-area: main;

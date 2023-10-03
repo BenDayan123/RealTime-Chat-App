@@ -1,14 +1,23 @@
 "use client";
 
+import React from "react";
 import { MdPeopleAlt } from "react-icons/md";
 import ConversationTab from "@components/ConversationTab";
 import { useSession } from "next-auth/react";
 import { useConversions } from "@hooks/useConversions";
 import Item from "./item";
+import ProfileStatus from "@components/ProfileStatus";
+import { useFriends } from "@hooks/useFriends";
 
 const SideBar: React.FC = () => {
-  const { data: conversions } = useConversions();
+  const conversions = useConversions();
   const { data: session } = useSession();
+  const { data: friends } = useFriends({ status: "ACCEPTED" });
+  // const friends = queryClient.getQueryData<IFriend[]>([
+  //   "friends",
+  //   "ACCEPTED",
+  //   session?.user.id,
+  // ]);
 
   return (
     <div
@@ -22,39 +31,25 @@ const SideBar: React.FC = () => {
       </ul>
       <div className="p-3 h-full overflow-y-auto max-h-full">
         {conversions &&
-          conversions.map((conversion) => {
-            const {
-              id,
-              is_group,
-              title,
-              members,
-              profile,
-              createdAt,
-              unseenCount,
-            } = conversion;
-            const image = profile || members[0].image;
-            const name = is_group ? title : members[0].name;
+          conversions.map(({ data: conversion, isLoading }) => {
+            if (!conversion) return null;
+            const { id, is_group, members } = conversion;
+            const status = !is_group
+              ? friends?.find((friend) => friend.id === members[0].id)
+                  ?.status || "offline"
+              : undefined;
             return (
               <ConversationTab
                 className="bg-surface-light dark:bg-surface-dark"
                 key={id}
-                id={id}
-                unseenCount={unseenCount}
-                image={image}
-                name={name}
-                time={createdAt.substring(11, 16)}
-                status={"offline"}
-                lastStatus={status || "offline"}
+                isLoading={isLoading}
+                status={status}
+                {...conversion}
               />
             );
           })}
       </div>
-      <ConversationTab
-        id={session?.user.id || ""}
-        image={session?.user.image || ""}
-        name={session?.user.name || ""}
-        lastStatus="Your Profile"
-      />
+      <ProfileStatus src={session?.user.image || ""} alt="" className="m-4" />
     </div>
   );
 };

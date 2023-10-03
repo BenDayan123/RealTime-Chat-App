@@ -28,12 +28,7 @@ export function useFriends({ status = "ACCEPTED" }: Props) {
 export function useFriend() {
   const { data: session } = useSession();
   const queryClient = useQueryClient();
-  const {
-    mutate: acceptRequest,
-    isLoading,
-    error,
-    data,
-  } = useMutation(
+  const { mutate: acceptRequest, ...rest } = useMutation(
     ({ friendID }: any) => {
       return axios.patch(`/api/user/${session?.user.id}/friends`, undefined, {
         params: { friend: friendID, status: "ACCEPTED" },
@@ -41,15 +36,15 @@ export function useFriend() {
     },
     {
       onSuccess({ data }, { friendID }) {
-        queryClient.setQueryData(
+        queryClient.setQueryData<IFriend[]>(
           ["friends", "PENDING", session?.user.id],
-          (old?: IFriend[]) => {
+          (old) => {
             return old?.filter((friend) => friend.id !== friendID) || [];
           }
         );
-        queryClient.setQueryData(
+        queryClient.setQueryData<IFriend[]>(
           ["friends", "ACCEPTED", session?.user.id],
-          (old?: IFriend[]) => {
+          (old) => {
             return old ? [data.requestedFrom, ...old] : [];
           }
         );
@@ -57,5 +52,5 @@ export function useFriend() {
     }
   );
 
-  return { acceptRequest, isLoading, error, data };
+  return { acceptRequest, ...rest };
 }

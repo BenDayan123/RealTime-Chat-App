@@ -21,16 +21,16 @@ function ChatLayout({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession();
   const { client: pusher } = usePusher();
   const queryClient = useQueryClient();
-  const { data: chats } = useConversions();
+  const chats = useConversions();
   const { key } = useFriends({ status: "ACCEPTED" });
 
   const watchlistEventHandler = useCallback((event: WatchListEvent) => {
     const { name, user_ids } = event;
     queryClient.setQueryData<IFriend[]>(key, (old) => {
-      return old?.map((friend: any) => {
-        if (user_ids.includes(friend.id)) friend.status = name;
-        return friend;
-      });
+      return old?.map((friend: any) => ({
+        ...friend,
+        status: user_ids.includes(friend.id) ? name : friend.status,
+      }));
     });
   }, []);
 
@@ -57,19 +57,18 @@ function ChatLayout({ children }: { children: React.ReactNode }) {
     });
     pusher.user.watchlist.bind("online", watchlistEventHandler);
     pusher.user.watchlist.bind("offline", watchlistEventHandler);
-
-    chats?.map((chat) => {
-      const channel = pusher.subscribe(`presence-room@${chat.id}`);
-      channel.bind(Events.NEW_CHANNEL_MESSAGE, (data: any) =>
-        console.warn(data)
-      );
-    });
+    // chats.map((chat) => {
+    //   const channel = pusher.subscribe(`presence-room@${chat.id}`);
+    //   channel.bind(Events.NEW_CHANNEL_MESSAGE, (data: any) =>
+    //     console.warn(data)
+    //   );
+    // });
 
     return () => {
-      chats?.map((chat) => pusher.unsubscribe(`presence-room@${chat.id}`));
+      // chats?.map((chat) => pusher.unsubscribe(`presence-room@${chat.id}`));
       pusher.user.unbind_all();
     };
-  }, [pusher]);
+  }, [pusher, chats]);
 
   return (
     <main className="application">
