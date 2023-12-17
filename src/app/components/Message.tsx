@@ -1,6 +1,6 @@
 "use client";
 
-import { PropsWithChildren, memo, use, useCallback, useEffect } from "react";
+import { PropsWithChildren, useCallback, useEffect } from "react";
 import { cn, isUrl, urlRegex } from "@lib/utils";
 import { MdDoneAll } from "react-icons/md";
 import { useInView } from "react-intersection-observer";
