@@ -3,16 +3,20 @@ import ProfileStatus from "@components/ProfileStatus";
 interface Props {
   title: string;
   image: string;
+  onClick?: () => void;
 }
 
-const ChatTitle: React.FC<Props> = ({ title, image }) => {
+const ChatTitle: React.FC<Props> = ({ title, image, onClick }) => {
   return (
     <header
-      className="w-full p-5 absolute backdrop-blur flex gap-4 items-center z-10 border-b-2
-        bg-surface-light bg-opacity-80 dark:bg-surface-dark dark:border-b-slate-200/10 dark:bg-opacity-60"
+      className="relative z-10 flex w-full items-center gap-4 border-b-2 bg-surface-light bg-opacity-80
+        p-5 backdrop-blur dark:border-b-slate-200/10 dark:bg-surface-dark dark:bg-opacity-60"
+      onClick={onClick}
     >
-      <ProfileStatus src={image} alt="" />
-      <p className="text-onSurface-light dark:text-onSurface-dark">{title}</p>
+      {image && <ProfileStatus src={image} className="h-14" alt="" />}
+      {title && (
+        <p className="text-onSurface-light dark:text-onSurface-dark">{title}</p>
+      )}
     </header>
   );
 };

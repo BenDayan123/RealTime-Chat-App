@@ -1,48 +1,77 @@
 import NextAuth from "next-auth";
 import type { NextAuthOptions } from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@lib/prisma";
 import CredentialsProvider from "next-auth/providers/credentials";
+import * as bcrypt from "bcrypt";
 
-const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, NEXTAUTH_SECRET } = process.env;
-// const { AUTH0_CLIENT_ID, AUTH0_CLIENT_SECRET, AUTH0_ISSUER } = process.env;
-// const { FACEBOOK_CLIENT_ID, FACEBOOK_CLIENT_SECRET } = process.env;
-// const { TWITTER_CLIENT_ID, TWITTER_CLIENT_SECRET } = process.env;
+const { NEXTAUTH_SECRET, SALT_ROUNDS = 10 } = process.env;
+const salt = bcrypt.genSaltSync(+SALT_ROUNDS);
 
 export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60,
   },
+  pages: {
+    signIn: "signin",
+    newUser: "/app/friends",
+  },
   adapter: PrismaAdapter(prisma as any) as any,
   providers: [
-    GoogleProvider({
-      clientId: GOOGLE_CLIENT_ID,
-      clientSecret: GOOGLE_CLIENT_SECRET,
-      profile(profile) {
-        return {
-          id: profile.sub,
-          name: profile.name,
-          email: profile.email,
-          image: profile.picture.replace(/s=\d+/, "s=600"),
-        };
-      },
-      checks: ["none"],
-    }),
     CredentialsProvider({
+      id: "login",
       type: "credentials",
-      name: "Sign in",
+      name: "login",
+
       async authorize(credentials) {
-        if (!credentials?.email || !credentials.password) return null;
-        const { email } = credentials;
-        const user = await prisma.user.findUnique({
-          where: { email },
-        });
+        const { email, password } = credentials ?? {};
+        if (!email || !password) return null;
+        const user = await prisma.user.findUnique({ where: { email } });
+        if (
+          user?.password &&
+          !(await bcrypt.compare(password, user.password))
+        ) {
+          throw new Error(
+            JSON.stringify({
+              errors: "Password is not currect",
+            }),
+          );
+        }
         return user;
       },
       credentials: {
-        email: { label: "Email", type: "text ", placeholder: "email" },
+        email: { label: "Email", type: "text", placeholder: "email" },
+        password: { label: "Password", type: "password" },
+      },
+    }),
+    CredentialsProvider({
+      id: "sign-up",
+      type: "credentials",
+      name: "Sign up",
+
+      async authorize(credentials) {
+        const { email, password, username, profile } = credentials ?? {};
+        if (!email || !password || !username || !profile) return null;
+        const user = await prisma.user.findUnique({ where: { email } });
+        if (user) {
+          if (user.name === username)
+            throw "There already user with that username";
+          throw "There already user with that email";
+        }
+        return await prisma.user.create({
+          data: {
+            email,
+            password: await bcrypt.hash(password, salt),
+            name: username,
+            image: profile,
+          },
+        });
+      },
+      credentials: {
+        profile: { label: "profile", type: "file" },
+        username: { label: "Username", type: "text", placeholder: "username" },
+        email: { label: "Email", type: "text", placeholder: "email" },
         password: { label: "Password", type: "password" },
       },
     }),
@@ -68,6 +97,19 @@ export const authOptions: NextAuthOptions = {
 
 export default NextAuth(authOptions);
 
+// GoogleProvider({
+//   clientId: GOOGLE_CLIENT_ID,
+//   clientSecret: GOOGLE_CLIENT_SECRET,
+//   profile(profile) {
+//     return {
+//       id: profile.sub,
+//       name: profile.name,
+//       email: profile.email,
+//       image: profile.picture.replace(/s=\d+/, "s=600"),
+//     };
+//   },
+//   checks: ["none"],
+// }),
 // Auth0Provider({
 //   clientId: AUTH0_CLIENT_ID,
 //   clientSecret: AUTH0_CLIENT_SECRET,

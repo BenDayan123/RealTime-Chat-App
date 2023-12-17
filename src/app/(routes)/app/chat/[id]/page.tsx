@@ -1,20 +1,24 @@
 "use client";
 
-import React, { useCallback } from "react";
-import Message from "@components/Message";
+import React, { useMemo } from "react";
 import MessageForm from "@components/message-form";
-import { usePusher } from "@harelpls/use-pusher";
 import { useMessages } from "@hooks/useMessages";
-import { useSession } from "next-auth/react";
-import { Ring } from "@uiball/loaders";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { TypingBubble } from "@components/TypingBubble";
-import { toTimeFormat } from "@lib/utils";
-import axios from "axios";
-import { useDropzone } from "react-dropzone";
-import { DateSeparator } from "@components/DateSeparator";
 import { useConversion } from "@hooks/useConversions";
 import ChatTitle from "./title";
+import LineSpinner from "@components/loaders/lineSpinner";
+import FilesDropBar from "@components/FilesBar";
+import { useChat } from "@hooks/useChat";
+import { MultiFileDropzone as FilesDropZone } from "@components/DropZoneWrapper";
+import UploadFileMessage from "@components/FileUploadMessage";
+import Squircle from "@components/loaders/squircle";
+import { toast } from "react-toastify";
+import { useEffectOnce, useUpdateEffect } from "usehooks-ts";
+import MessageList from "./MessageList";
+import { useDarkMode } from "@hooks/useDarkMode";
+import { cn } from "@lib/utils";
+import AvatarsGroup from "@components/AvatarsGroup";
 
 interface Props {
   params: {
@@ -22,29 +26,25 @@ interface Props {
   };
 }
 
+const MB = 2 ** 20;
+
 export default function ChatApp({ params: { id } }: Props) {
-  const { data: messages, isLoading } = useMessages(id);
-  const { data: session } = useSession();
-  const { updateChat, members, profile, is_group, ...chat } = useConversion(id);
-  const [batchedMessages, setBatchedMessages] = useState<string[]>([]);
-  const { client: pusher } = usePusher();
+  const { isDarkMode } = useDarkMode(true);
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetching } =
+    useMessages(id);
+  const messages = useMemo(
+    () => data?.pages.reduce((prev, curr) => [...curr, ...prev], []),
+    [data],
+  );
+  const { files, setChatID, setFiles, setShow } = useChat();
+  const uploadedFiles = useMemo(
+    () => files.filter((file) => typeof file.progress == "number"),
+    [files],
+  );
+  const { updateChat, members, profile, is_group, admins, ...chat } =
+    useConversion(id);
+  const pageYOffset = useRef(0);
   const chatContainer = useRef<HTMLDivElement>(null);
-
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    acceptedFiles.forEach((file) => {
-      const reader = new FileReader();
-
-      reader.onabort = () => console.log("file reading was aborted");
-      reader.onerror = () => console.log("file reading has failed");
-      reader.onload = () => {
-        const binaryStr = reader.result;
-        console.log(binaryStr);
-      };
-      reader.readAsArrayBuffer(file);
-    });
-  }, []);
-  const { getRootProps, getInputProps, isDragActive, acceptedFiles, rootRef } =
-    useDropzone({ onDrop });
 
   function scrollToBottom() {
     if (!chatContainer.current) return;
@@ -53,96 +53,111 @@ export default function ChatApp({ params: { id } }: Props) {
     });
   }
 
+  function handleScroll(e: React.UIEvent<HTMLDivElement, UIEvent>) {
+    const chat = e.currentTarget;
+    if (chat.scrollTop === 0 && hasNextPage) {
+      pageYOffset.current = chat.scrollHeight;
+      fetchNextPage();
+    }
+  }
+  useUpdateEffect(() => {
+    if (!chatContainer.current) return;
+    chatContainer.current.scrollTo({
+      top: chatContainer.current.scrollHeight - pageYOffset.current,
+      behavior: "instant",
+    });
+  }, [messages, chatContainer]);
+
   useEffect(() => {
+    setChatID(id);
+  }, [id]);
+
+  useEffectOnce(() => {
     scrollToBottom();
-  }, [messages]);
+  });
 
-  useEffect(() => {
-    const timeOutID = setTimeout(() => {
-      if (batchedMessages.length > 0) {
-        axios
-          .post("/api/message/seen", {
-            messages: batchedMessages,
-            socket_id: pusher?.connection.socket_id,
-            channel_id: `presence-room@${id}`,
-          })
-          .then(() => {
-            updateChat((old) => ({
-              unseenCount: Math.max(
-                0,
-                old.unseenCount - batchedMessages.length
-              ),
-            }));
-          });
-        setBatchedMessages([]);
-      }
-    }, 700);
-    return () => clearTimeout(timeOutID);
-  }, [batchedMessages]);
+  if (isLoading || !members) return <Squircle />;
 
-  if (isLoading || !chat)
-    return (
-      <div className="w-full h-full flex justify-center items-center">
-        <Ring size={100} lineWeight={5} speed={2} color="gray" />
-      </div>
-    );
   return (
-    <div
-      {...getRootProps({
-        onClick: (e) => e.preventDefault(),
-        className: "max-h-full h-full flex flex-col",
-      })}
+    <FilesDropZone
+      className="flex h-full max-h-full max-w-full flex-col"
+      value={files}
+      dropzoneOptions={{ maxFiles: 10, maxSize: 13 * MB }}
+      onError={(error) => {
+        toast.error(error, {
+          position: "bottom-left",
+          progress: undefined,
+          theme: "colored",
+        });
+      }}
+      onChange={(files) => setFiles(files)}
+      onFilesAdded={async (addedFiles) => setFiles([...files, ...addedFiles])}
     >
+      <div
+        className={cn(
+          "gradient-background pointer-events-none absolute left-0 top-0 z-0 h-full w-full blur-3xl",
+          isDarkMode ? "opacity-0" : "opacity-30",
+        )}
+      ></div>
       <ChatTitle
-        image={(is_group ? profile : members[0]?.image) || ""}
-        title={(is_group ? chat.title : members[0]?.name) || ""}
+        onClick={() => setShow((prev) => !prev)}
+        image={(is_group ? profile : members[0].image) ?? ""}
+        title={is_group ? chat.name : members[0].name}
       />
       <div
-        className="h-full flex flex-col gap-2 p-6 pt-24 overflow-auto"
+        className="h-full max-h-full flex-1 overflow-auto overflow-x-hidden p-6"
+        onScroll={handleScroll}
         ref={chatContainer}
       >
-        {messages?.map((message, i) => {
-          const { body, from, id, createdAt, seen } = message;
-          const mine = from.id === session?.user.id,
-            createdDate = new Date(createdAt);
-          return (
-            <React.Fragment key={id}>
-              <DateSeparator
-                date={createdDate}
-                prevDate={
-                  i !== 0 ? new Date(messages[i - 1].createdAt) : undefined
-                }
+        {!hasNextPage && (
+          <div className="pointer-events-none z-10 mx-auto flex w-fit flex-col items-center space-y-1 drag-none">
+            {is_group ? (
+              <AvatarsGroup
+                animate={false}
+                images={[
+                  ...members.map((e) => e.image),
+                  ...admins.map((e) => e.image),
+                ]}
               />
-              <Message
-                mine={mine}
-                time={toTimeFormat(createdAt)}
-                id={id}
-                key={id}
-                seen={seen}
-                onView={(inView) => {
-                  if (inView && !seen && !mine && !batchedMessages.includes(id))
-                    setBatchedMessages((prev) => [...prev, id]);
-                }}
-                isConnected={
-                  i !== 0 && messages[i - 1].fromID === message.fromID
-                }
-                profile={from.image}
-                sender={from.name}
-              >
-                {body}
-              </Message>
-            </React.Fragment>
-          );
-        })}
+            ) : (
+              <img
+                src={members[0].image}
+                className="z-10 aspect-square h-auto w-28 rounded-full object-cover"
+                alt=""
+              />
+            )}
+            <p className="text-xl font-bold text-black dark:text-white">
+              {is_group ? chat.name : members[0].name}
+            </p>
+            <p className="text-base text-black opacity-70 dark:text-white">
+              {is_group ? "Group Chat" : "Private conversion"}
+            </p>
+          </div>
+        )}
+        {isFetching && <LineSpinner />}
+        <MessageList messages={messages} />
+        <UploadFileMessage
+          name={`Uploading ${uploadedFiles.length} files`}
+          size={uploadedFiles.reduce((a, b) => a + b.file.size, 0)}
+          progress={
+            +(
+              uploadedFiles.reduce((a, b) => {
+                return typeof b.progress == "number" ? a + b.progress : a;
+              }, 0) / uploadedFiles.length
+            ).toFixed(2)
+          }
+        />
       </div>
-      <div className="p-5 pt-0 w-full">
-        {chat.liveAction && <TypingBubble name={chat.liveAction} />}
+      <div className="w-full p-5 pt-0">
+        {uploadedFiles.length === 0 && <FilesDropBar files={files} />}
+        {chat.liveAction?.type === "TYPING" && (
+          <TypingBubble name={chat.liveAction.user} />
+        )}
         <MessageForm id={id} />
       </div>
-    </div>
+    </FilesDropZone>
   );
 }
-
 // console.log(
 //   "%frenkel is gay!",
 //   "box-sizing:content-box;font:normal normal bold 70px/normal Helvetica,sans-serif;color:transparent;text-align:center;text-shadow:3px 0 0 #d91f26,6px 0 0 #e25b0e,9px 0 0 #f5dd08,12px 0 0 #059444,15px 0 0 #0287ce,18px 0 0 #044d91,21px 0 0 #2a1571;transition:all 600ms cubic-bezier(.68,-.55,.265,1.55)"

@@ -2,7 +2,7 @@ import React, { ReactNode } from "react";
 import { PropsWithChildren } from "react";
 import { cn } from "@lib/utils";
 import { IconType } from "react-icons";
-import { Pulsar } from "@uiball/loaders";
+import LineSpinner from "@components/loaders/lineSpinner";
 
 interface Props
   extends React.DetailedHTMLProps<
@@ -24,16 +24,15 @@ const Button: React.FC<PropsWithChildren<Props>> = ({
   return (
     <button
       className={cn(
-        "w-full h-12 rounded-lg flex flex-wrap items-center justify-center gap-3 bg-blue-700 p-3 text-white transition-all hover:bg-blue-600 active:scale-90 overflow-hidden",
-        className
+        "flex h-12 w-full cursor-pointer items-center justify-center gap-3 overflow-hidden rounded-lg bg-blue-700 p-3 text-white transition-all hover:bg-blue-600 active:scale-90",
+        className,
       )}
       type="button"
       {...rest}
     >
       {loading ? (
-        <Pulsar size={25} speed={1.75} color="white" />
+        <LineSpinner size={20} />
       ) : (
-        // <LoadingSpinner fill="fill-white" size="w-6 h-6" />
         <>
           {Icon && React.isValidElement(Icon) && Icon}
           {name && <div>{name}</div>}

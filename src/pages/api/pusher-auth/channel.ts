@@ -1,6 +1,7 @@
 import Pusher from "pusher";
 import { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "@lib/prisma";
+import { ExtractChannelID } from "@lib/utils";
 
 const { PUSHER_APP_ID, PUSHER_CLIENT_KEY, PUSHER_SECERT, PUSHER_CLUSTER } =
   process.env;
@@ -15,15 +16,15 @@ const pusher = new Pusher({
 
 export default async function ChannelAuthPusherHandler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   const { socket_id, channel_name, ...user } = req.body;
   const { id } = user;
-  const channel_id = (channel_name as string).split("@").at(-1);
+  const channel_id = ExtractChannelID(channel_name);
   const conversion = await prisma.conversion.findUnique({
     where: {
       id: channel_id,
-      members: { some: { id } },
+      OR: [{ members: { some: { id } } }, { admins: { some: { id } } }],
     },
   });
   if (!conversion) return res.json(null);
@@ -35,7 +36,7 @@ export default async function ChannelAuthPusherHandler(
   const authResponse = pusher.authorizeChannel(
     socket_id,
     channel_name,
-    presenceData
+    presenceData,
   );
   return res.json(authResponse);
 }

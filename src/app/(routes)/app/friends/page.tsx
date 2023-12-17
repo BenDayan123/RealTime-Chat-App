@@ -2,30 +2,23 @@
 
 import { NextPage } from "next";
 import { useFriends } from "@hooks/useFriends";
-import UserItem from "./UserItem";
-import { AcceptButton, IgnoreButton } from "./buttons";
+import UserRow from "./UserRow";
 
 const AllFriendsPage: NextPage = () => {
-  const { data: friends } = useFriends({ status: "PENDING" });
+  const { data: friends } = useFriends({ status: "ACCEPTED" });
   return (
     <div className="p-4">
-      <h1 className="text-onBG-light px-5 dark:text-onBG-dark">
-        All Friends: {friends?.length}
+      <h1 className="px-5 text-xl font-bold text-onBG-light dark:text-onBG-dark">
+        All Friends - {friends?.length}
       </h1>
       {friends?.map(({ name, id, image, status }, i) => (
-        <UserItem
+        <UserRow
           className="bg-background-light dark:bg-background-dark"
           name={name}
           key={id || i}
+          status={status ?? "offline"}
           image={image}
-          status={status || "offline"}
           id={id}
-          buttons={
-            <>
-              <AcceptButton userID={id} />
-              <IgnoreButton userID={id} />
-            </>
-          }
           description={status || "Online"}
         />
       ))}

@@ -1,20 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@lib/prisma";
-import Pusher from "pusher";
+import { prisma, exclude } from "@lib/prisma";
+import { pusher } from "@lib/socket";
 import { Events } from "@lib/events";
 import { FriendShipStatus } from "@interfaces/user";
 import url from "url";
 
-const { PUSHER_APP_ID, PUSHER_CLIENT_KEY, PUSHER_SECERT, PUSHER_CLUSTER } =
-  process.env;
-
-const pusher = new Pusher({
-  appId: PUSHER_APP_ID,
-  key: PUSHER_CLIENT_KEY,
-  secret: PUSHER_SECERT,
-  cluster: PUSHER_CLUSTER,
-  useTLS: true,
-});
 interface Params {
   id: string;
 }
@@ -24,7 +14,7 @@ export async function GET(req: NextRequest, { params }: { params: Params }) {
   const { status } = url.parse(req.url, true).query;
   const friends = (await prisma.user.getFriends(
     id,
-    (status as FriendShipStatus) || undefined
+    (status as FriendShipStatus) || "PENDING",
   )) as any;
   return NextResponse.json(friends);
 }
@@ -33,25 +23,37 @@ export async function POST(req: NextRequest, { params }: { params: Params }) {
   const { id: myID } = params;
   const { friendEmail } = await req.json();
   const [me, friend] = await Promise.all([
-    prisma.user.findUnique({ where: { id: myID } }),
-    prisma.user.findUnique({ where: { email: friendEmail } }),
+    prisma.user.findUnique({
+      where: { id: myID },
+      select: { id: true, image: true, name: true, email: true },
+    }),
+    prisma.user.findUnique({
+      where: { email: friendEmail },
+      select: { id: true, image: true, name: true, email: true },
+    }),
   ]);
   if (!friend)
     return NextResponse.json(
       { message: "User does not exist" },
-      { status: 401 }
+      { status: 401 },
     );
+  if (myID === friend.id) {
+    return NextResponse.json(
+      { message: "You cant send friend request to yourself" },
+      { status: 401 },
+    );
+  }
   const friendship = await prisma.friendship.findFriendship(myID, friend.id);
 
   if (Boolean(friendship)) {
     if (friendship?.status === "PENDING")
       return NextResponse.json(
         { message: "The Friend Request Already Been Sent!" },
-        { status: 409 }
+        { status: 409 },
       );
     return NextResponse.json(
       { message: "The user Already Your Friend" },
-      { status: 409 }
+      { status: 409 },
     );
   }
 
@@ -62,13 +64,21 @@ export async function POST(req: NextRequest, { params }: { params: Params }) {
     },
   });
 
-  await pusher.sendToUser(friend.id, Events.FRIEND_REQUEST, {
-    user: me,
-    newFriendship,
+  await pusher.sendToUser(friend.id, Events.NEW_FRIEND_REQUEST, {
+    user: {
+      ...me,
+      type: "ingoing",
+    },
+  });
+  await pusher.sendToUser(myID, Events.NEW_FRIEND_REQUEST, {
+    user: {
+      ...friend,
+      type: "outgoing",
+    },
   });
   return NextResponse.json(
     { message: "Friend Request Sent!" },
-    { status: 201 }
+    { status: 201 },
   );
 }
 
@@ -83,11 +93,11 @@ export async function PATCH(req: NextRequest, { params }: { params: Params }) {
   if (status !== "ACCEPTED" && status !== "PENDING") {
     return NextResponse.json(
       `status's value can only be 'ACCEPTED' or 'PENDING'`,
-      { status: 400 }
+      { status: 400 },
     );
   }
   try {
-    const friendship = await prisma.friendship.update({
+    const data = await prisma.friendship.update({
       where: {
         id: {
           requestedFromID: friend,
@@ -96,18 +106,30 @@ export async function PATCH(req: NextRequest, { params }: { params: Params }) {
       },
       data: { status },
       include: {
-        requestedFrom: true,
-        requestedTo: true,
+        requestedFrom: {
+          select: {
+            id: true,
+            image: true,
+            name: true,
+          },
+        },
+        requestedTo: {
+          select: {
+            id: true,
+            image: true,
+            name: true,
+          },
+        },
       },
     });
+    const friendship = exclude(data, ["requestedFromID", "requestedToID"]);
 
-    const { name, image } = friendship.requestedTo;
     await pusher.sendToUser(friend, Events.FRIEND_STATUS_CHANGED, {
-      message: `The Friend request has been ${status} from ${name}`,
-      image,
+      status,
+      friendship,
     });
     return NextResponse.json(friendship);
-  } catch {
+  } catch (e) {
     return NextResponse.json("Friendship cannot be found", { status: 404 });
   }
 }

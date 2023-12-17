@@ -1,5 +1,5 @@
 import { FriendShipStatus } from "@interfaces/user";
-import { Prisma, PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 
 const prismaClientSingleton = () => {
   return new PrismaClient({ log: ["warn"] }).$extends({
@@ -8,7 +8,6 @@ const prismaClientSingleton = () => {
         async update({ args, query }) {
           const friendship = await query(args);
           const { requestedFromID, requestedToID, status } = friendship;
-          console.log("update: ", status);
           if (status !== "ACCEPTED") return friendship;
           await prisma.conversion.create({
             data: {
@@ -27,12 +26,14 @@ const prismaClientSingleton = () => {
           const friendships = await prisma.friendship.findMany({
             where: {
               OR: [
-                { ...(status === "ACCEPTED" && { requestedFromID: id }) },
+                { requestedFromID: id },
+                // { ...(status === "ACCEPTED" && { requestedFromID: id }) },
                 { requestedToID: id },
               ],
               status,
             },
             select: {
+              status: true,
               requestedFrom: {
                 select: {
                   id: true,
@@ -51,11 +52,13 @@ const prismaClientSingleton = () => {
               },
             },
           });
-          return friendships.map((friendship: any) =>
-            friendship.requestedFrom.id === id
+          return friendships.map((friendship: any) => ({
+            ...(friendship.requestedFrom.id === id
               ? friendship.requestedTo
-              : friendship.requestedFrom
-          );
+              : friendship.requestedFrom),
+            friendship_status: friendship.status,
+            type: friendship.requestedFrom.id === id ? "outgoing" : "ingoing",
+          }));
         },
       },
       friendship: {
@@ -63,14 +66,8 @@ const prismaClientSingleton = () => {
           return await prisma.friendship.findFirst({
             where: {
               OR: [
-                {
-                  requestedToID: myID,
-                  requestedFromID: friendID,
-                },
-                {
-                  requestedToID: friendID,
-                  requestedFromID: myID,
-                },
+                { requestedToID: myID, requestedFromID: friendID },
+                { requestedToID: friendID, requestedFromID: myID },
               ],
             },
           });
@@ -89,3 +86,9 @@ const globalForPrisma = globalThis as unknown as {
 export const prisma = globalForPrisma.prisma ?? prismaClientSingleton();
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+
+export function exclude(data: any, keys: string[]) {
+  return Object.fromEntries(
+    Object.entries(data).filter(([key]) => !keys.includes(key)),
+  );
+}

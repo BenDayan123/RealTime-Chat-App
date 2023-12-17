@@ -1,37 +1,57 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import axios from "axios";
 import RecordButton from "./recorder";
 import TextareaAutosize from "react-textarea-autosize";
 import EmojiPicker from "emoji-picker-react";
 import { MdEmojiEmotions, MdSend } from "react-icons/md";
 import { cn } from "@lib/utils";
-import { useChannel, useClientTrigger } from "@harelpls/use-pusher";
 import { useSession } from "next-auth/react";
 import { Events } from "@lib/events";
+import { useChat } from "@hooks/useChat";
+import { useEdgeStore } from "@lib/store";
+import { usePusher } from "@hooks/usePusher";
+import { useDarkMode } from "@hooks/useDarkMode";
+import { Button } from "./button";
 
 interface Props {
   id: string;
 }
 
-const MessageForm: React.FC<Props> = ({ id }) => {
-  const [text, setText] = useState("");
-  const [showEmojis, setEmojis] = useState(false);
-  const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(
-    null
-  );
-  const { data: session } = useSession();
-  const channel = useChannel(`presence-room@${id}`);
-  const triggerEvent = useClientTrigger(channel);
+const IconStyle =
+  "fill-onBG-light dark:fill-onBG-dark opacity-60 group-hover:opacity-100";
 
-  function SendMessage() {
-    axios.post("/api/message", {
-      body: text,
+const MessageForm: React.FC<Props> = ({ id }) => {
+  const { isDarkMode } = useDarkMode(true);
+  const { body, files, setBody, updateFileProgress, cleanChat } = useChat();
+  const { edgestore } = useEdgeStore();
+  const [showEmojis, setEmojis] = useState(false);
+  const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout>();
+  const { data: session } = useSession();
+  const pusher = usePusher();
+  const channel = pusher?.channel(`presence-room@${id}`);
+  const canSend = useMemo(() => !!body || files.length > 0, [body, files]);
+
+  async function SendMessage() {
+    if (!canSend) return;
+    const uploadedFiles = await Promise.all(
+      files.map((fileState) =>
+        edgestore.publicFiles.upload({
+          file: fileState.file,
+          onProgressChange: (progress) => {
+            updateFileProgress(fileState.key, progress);
+          },
+        }),
+      ),
+    );
+    await axios.post("/api/message", {
       channel_name: `presence-room@${id}`,
       sender_id: session?.user.id,
+      files: uploadedFiles,
+      body,
     });
-    setText("");
+    cleanChat();
   }
 
   function EmojiToggle() {
@@ -41,16 +61,16 @@ const MessageForm: React.FC<Props> = ({ id }) => {
   function stopTypingHandler() {
     setTypingTimeout(
       setTimeout(() => {
-        setTypingTimeout(null);
-        triggerEvent(Events.USER_STOP_TYPING, {});
-      }, 1500)
+        setTypingTimeout(undefined);
+        channel?.trigger(Events.USER_STOP_TYPING, {});
+      }, 1500),
     );
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      triggerEvent(Events.USER_STOP_TYPING, {});
+      channel?.trigger(Events.USER_STOP_TYPING, {});
       SendMessage();
       return false;
     }
@@ -58,9 +78,9 @@ const MessageForm: React.FC<Props> = ({ id }) => {
   }
 
   function handleInput(e: React.FormEvent<HTMLTextAreaElement>) {
-    setText(e.currentTarget.value);
+    setBody(e.currentTarget.value);
     if (!typingTimeout) {
-      triggerEvent(Events.USER_TYPING, { name: session?.user.name });
+      channel?.trigger(Events.USER_TYPING, { name: session?.user.name });
       stopTypingHandler();
     } else {
       clearTimeout(typingTimeout);
@@ -70,39 +90,42 @@ const MessageForm: React.FC<Props> = ({ id }) => {
 
   return (
     <div
-      className={`relative bg-surface-light px-6 py-4 gap-2 dark:bg-surface-dark rounded-md flex items-start border-blue-400 border-2 dark:border-opacity-0`}
+      className={`relative flex items-center rounded-md border-2 border-blue-400 bg-surface-light px-4 py-2 dark:border-opacity-0 dark:bg-surface-dark`}
     >
-      <RecordButton />
+      <RecordButton
+        onStartRecording={() =>
+          channel?.trigger(Events.USER_RECORDING, { name: session?.user.name })
+        }
+        onStopRecording={() => channel?.trigger(Events.USER_STOP_RECORDING, {})}
+      />
       <TextareaAutosize
-        value={text}
+        value={body}
         minRows={1}
         rows={1}
         maxRows={10}
         onKeyDown={handleKeyDown}
         onInput={handleInput}
         placeholder="Type a message..."
-        className="resize-none w-full h-full px-3 outline-none bg-tran text-onBG-light dark:text-onBG-dark"
+        className="h-full w-full resize-none bg-tran px-3 text-onBG-light outline-none dark:text-onBG-dark"
       />
-      <i onClick={EmojiToggle} className="group">
-        <MdEmojiEmotions
-          className="fill-onBG-light dark:fill-onBG-dark opacity-60 group-hover:fill-active group-hover:opacity-100 cursor-pointer"
-          size={25}
-        />
-      </i>
-      <i onClick={SendMessage} className="group">
+      <Button onClick={EmojiToggle}>
+        <MdEmojiEmotions className={IconStyle} size={25} />
+      </Button>
+      <Button onClick={SendMessage}>
         <MdSend
           size={25}
           className={cn(
-            "fill-onBG-light dark:fill-onBG-dark opacity-60 group-hover:fill-active group-hover:opacity-100 cursor-pointer",
-            text === "" && "opacity-10 pointer-events-none"
+            IconStyle,
+            !canSend && "cursor-not-allowed opacity-10 group-hover:opacity-10",
           )}
         />
-      </i>
+      </Button>
       {showEmojis && (
-        <div className="absolute -top-4 right-0 -translate-y-full">
+        <div className="absolute -top-4 right-0 z-20 -translate-y-full">
           <EmojiPicker
-            onEmojiClick={(emoji) => setText((prev) => prev + emoji.emoji)}
+            onEmojiClick={({ emoji }) => setBody((prev) => prev + emoji)}
             emojiStyle={"native" as any}
+            theme={(isDarkMode ? "dark" : "light") as any}
           />
         </div>
       )}

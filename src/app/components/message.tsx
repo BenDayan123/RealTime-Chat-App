@@ -1,10 +1,17 @@
 "use client";
 
-import { PropsWithChildren, memo, useEffect } from "react";
-import { cn } from "@lib/utils";
+import { PropsWithChildren, memo, use, useCallback, useEffect } from "react";
+import { cn, isUrl, urlRegex } from "@lib/utils";
 import { MdDoneAll } from "react-icons/md";
-import ProfileStatus from "./ProfileStatus";
 import { useInView } from "react-intersection-observer";
+import { IFile } from "@interfaces/message";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { ContextMenuWrapper, Item } from "./ContextMenu";
+import { IoMdTrash } from "react-icons/io";
+import axios from "axios";
+import { useChat } from "@hooks/useChat";
+import { MessageType } from "@prisma/client";
 
 interface Props {
   id: string;
@@ -12,74 +19,162 @@ interface Props {
   isConnected?: boolean;
   sender: string;
   seen?: boolean;
+  type: MessageType;
+  showBG?: boolean;
   profile?: string;
-  time?: string;
+  time: string;
+  body?: string;
+  files?: IFile[];
   onView?: (inView: boolean) => void;
 }
 
 const Message: React.FC<PropsWithChildren<Props>> = ({
   children,
   mine,
-  id,
   sender,
   isConnected,
-  profile,
   seen,
+  type,
   time,
+  body,
+  id,
   onView,
+  showBG = true,
 }) => {
+  if (!children && !body) return null;
+
   const { ref, inView } = useInView({ triggerOnce: true });
+  const { chatID } = useChat();
 
   useEffect(() => {
-    onView && onView(inView);
+    onView && void onView(inView);
   }, [inView]);
 
+  const embedLink = useCallback((link: string) => {
+    const host = new URL(link).host;
+    switch (host.replace("www.", "").split(".")[0]) {
+      // case "youtube": {
+      //   return <YouTubeEmbed url={link} width={450} height={253} />;
+      // }
+      // case "tiktok": {
+      //   return <TikTokEmbed url={link} height={550} />;
+      // }
+      // case "twitter": {
+      //   return <TwitterEmbed url={link} height={350} />;
+      // }
+      // case "instagram": {
+      //   return <InstagramEmbed url={link} height={500} />;
+      // }
+      default: {
+        return (
+          <Link href={link} target="_blank">
+            {link}
+          </Link>
+        );
+      }
+    }
+  }, []);
+
+  const renderBody = useCallback(() => {
+    return body?.split(urlRegex).map((word, i) =>
+      isUrl(word) ? (
+        <div className="my-1 overflow-hidden rounded-lg" key={i}>
+          {embedLink(word)}
+        </div>
+      ) : (
+        word
+      ),
+    );
+  }, [body]);
+
   return (
-    <div
+    <motion.div
+      initial={{ y: 80, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ ease: "easeOut" }}
       ref={ref}
       className={cn(
-        "max-w-[50%] w-fit select-none flex gap-2",
-        mine && "self-end"
+        "relative my-2 w-fit max-w-[60%] auto-rows-fr grid-cols-[max-content_max-content] gap-x-2 max-xl:max-w-full",
+        mine && "ml-auto",
       )}
     >
-      {profile && !mine && (
-        <ProfileStatus
-          className={cn("self-center", isConnected && "invisible")}
-          src={profile}
-          alt=""
-          height={35}
-          width={35}
-        />
+      {!mine && !isConnected && (
+        <p className="col-start-2 row-start-1 my-1 text-sm font-bold text-onBG-light dark:text-onBG-dark">
+          {sender}
+        </p>
       )}
-      <div>
-        {!mine && !isConnected && (
-          <p className="text-onBG-light text-sm font-bold dark:text-onBG-dark my-1">
-            {sender}
-          </p>
-        )}
+      <ContextMenuWrapper
+        items={
+          <>
+            <Item>Select Message</Item>
+            <Item divide={mine}>Edit</Item>
+            <Item
+              onClick={() =>
+                axios.delete("/api/message", {
+                  data: { messages: [id], channel_id: chatID },
+                })
+              }
+              show={mine}
+              className="text-red-500 hover:bg-red-700/30 dark:text-red-500"
+              icon={<IoMdTrash size={20} className="fill-red-500" />}
+            >
+              Delete
+            </Item>
+          </>
+        }
+      >
         <div
           className={cn(
-            "py-2 px-4 font-light rounded-md w-fit whitespace-pre-line break-words relative",
-            mine ? "bg-surface-dark text-white" : "bg-surface-light text-black",
-            !isConnected && "rounded-tl-none"
+            "message relative col-start-2 h-auto w-fit break-words rounded-md px-4 py-2 font-light",
+            mine && "bg-message-out-bg-light text-message-out-text-light",
+            !mine &&
+              "bg-message-in-bg-light text-message-in-text-light dark:bg-message-in-bg-dark dark:text-message-in-text-dark",
+            !showBG && "bg-transparent p-0 dark:bg-transparent",
+            !isConnected && !mine && "rounded-tl-none",
+            !isConnected && mine && "rounded-tr-none",
           )}
-          // bg-blue-400
         >
-          {children}
-          <div className="flex justify-end gap-x-2">
-            {time && (
-              <p className="opacity-75 text-right text-[.7rem]">{time}</p>
+          {body && <p className="whitespace-pre-line">{renderBody()}</p>}
+          {type !== "TEXT" && children}
+          <div
+            className={cn(
+              "mt-2 flex justify-end gap-x-2",
+              !showBG && "text-black dark:text-white",
             )}
+          >
             {mine && (
               <MdDoneAll
-                className={cn(seen ? "fill-green-400" : "fill-white")}
+                className={cn(seen ? "fill-blue-700" : "fill-gray-300")}
               />
+            )}
+            {time && (
+              <p className="select-none text-right text-[.7rem] opacity-75">
+                {time}
+              </p>
             )}
           </div>
         </div>
-      </div>
-    </div>
+      </ContextMenuWrapper>
+    </motion.div>
   );
 };
 
 export default memo(Message);
+// bg-blue-400
+// import {
+//   YouTubeEmbed,
+//   TikTokEmbed,
+//   TwitterEmbed,
+//   InstagramEmbed,
+// } from "react-social-media-embed";
+{
+  /* {profile && !mine && (
+    <ProfileStatus
+      className={cn("row-span-1", isConnected && "invisible")}
+      src={profile}
+      alt={sender}
+      height={35}
+      width={35}
+    />
+  )} */
+}

@@ -17,6 +17,7 @@ const Item: React.FC<PropsWithChildren<Props>> = ({
   children,
   icon: Icon,
   navTo,
+  className,
 }) => {
   const router = useRouter();
   const pathname = usePathname();
@@ -25,9 +26,10 @@ const Item: React.FC<PropsWithChildren<Props>> = ({
     <li
       onClick={() => navTo && router.push(navTo)}
       className={cn(
-        `hover:bg-background-light text-onBG-light dark:text-onBG-dark hover:dark:bg-background-dark
-       cursor-pointer py-4 px-6 rounded-lg select-none flex items-center gap-4`,
-        pathname === navTo && "bg-onBG-dark dark:bg-onBG-light"
+        `flex cursor-pointer select-none items-center
+       gap-4 rounded-lg px-6 py-4 text-onBG-light hover:bg-background-light dark:text-onBG-dark hover:dark:bg-background-dark`,
+        pathname === navTo && "bg-onBG-dark dark:bg-onBG-light",
+        className,
       )}
     >
       {Icon && <Icon size={30} />}

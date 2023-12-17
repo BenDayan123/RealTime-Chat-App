@@ -4,13 +4,18 @@ export interface IConversion {
   id: string;
   is_group: boolean;
   members: IUser[];
+  admins: IUser[];
+  description?: string;
   profile?: string;
   createdAt: string;
-  title: string;
+  name: string;
   unseenCount: number;
-  liveAction?: string;
-  lastAction?: {
+  lastAction: {
     body: string;
-    updatedAt: string;
+    createdAt: string;
+  };
+  liveAction?: {
+    user: string;
+    type: "TYPING" | "RECORDING";
   };
 }

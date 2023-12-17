@@ -4,13 +4,19 @@ import SideBar from "@components/sidebar";
 import { IFriend, IStatus } from "@interfaces/user";
 import { useCallback, useEffect, useState } from "react";
 import { Events } from "@lib/events";
-import { useFriends } from "@hooks/useFriends";
+import { motion } from "framer-motion";
+import { useFriend, useFriends } from "@hooks/useFriends";
 import { useQueryClient } from "@tanstack/react-query";
-import { PusherProvider, usePusher } from "@harelpls/use-pusher";
+import { ToastContainer, toast } from "react-toastify";
 import { useSession } from "next-auth/react";
-import { getPusher } from "@lib/socket";
+import { PusherProvider, usePusher } from "@hooks/usePusher";
+import { ChatProvider, useChat } from "@hooks/useChat";
+import { GlobalChannelListener } from "@hooks/EventListner";
+import { useRouter } from "next/navigation";
+import { useDarkMode } from "@hooks/useDarkMode";
+import Info from "@components/ChatInfo";
+import "react-toastify/dist/ReactToastify.css";
 import "./style.scss";
-import { useConversions } from "@hooks/useConversions";
 
 interface WatchListEvent {
   name: IStatus;
@@ -18,12 +24,13 @@ interface WatchListEvent {
 }
 
 function ChatLayout({ children }: { children: React.ReactNode }) {
+  const { isDarkMode } = useDarkMode(true);
   const { data: session } = useSession();
-  const { client: pusher } = usePusher();
+  const pusher = usePusher();
   const queryClient = useQueryClient();
-  const chats = useConversions();
   const { key } = useFriends({ status: "ACCEPTED" });
-
+  const { moveToAccepted } = useFriend();
+  const { showInfo, chatID } = useChat();
   const watchlistEventHandler = useCallback((event: WatchListEvent) => {
     const { name, user_ids } = event;
     queryClient.setQueryData<IFriend[]>(key, (old) => {
@@ -36,42 +43,62 @@ function ChatLayout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!pusher) return;
-    pusher?.signin();
+    pusher.signin();
 
-    pusher.user.bind(Events.FRIEND_REQUEST, (request: any) => {
+    pusher.user.bind(Events.NEW_GROUP_CREATED, (group: { id: string }) => {
+      queryClient.setQueryData<string[]>(
+        ["conversions", session?.user.id],
+        (old) => (old ? [...old, group.id] : []),
+      );
+    });
+
+    pusher.user.bind(Events.NEW_FRIEND_REQUEST, (request: any) => {
       queryClient.setQueryData<IFriend[]>(
         ["friends", "PENDING", session?.user.id],
         (old: any) => {
           return [...(old || []), request.user];
-        }
+        },
       );
-      new Notification(`${request.user.name} send you a friend request!`, {
-        body: request.user.email,
-        icon: "https://educate.io/images/App-Icon-p-500.png",
+      toast(`${request.user.name} send you a friend request!`, {
+        position: "bottom-left",
+        progress: undefined,
+        theme: isDarkMode ? "dark" : "light",
       });
     });
     pusher.user.bind(Events.FRIEND_STATUS_CHANGED, (request: any) => {
-      new Notification(request.message, {
-        icon: "https://educate.io/images/App-Icon-p-500.png",
-      });
+      const { status, friendship } = request;
+      status === "ACCEPTED" && moveToAccepted(friendship.requestedTo);
+
+      toast(
+        `${
+          friendship.requestedTo.name
+        } ${status.toLowerCase()} your friend request`,
+        {
+          position: "bottom-left",
+          progress: undefined,
+          theme: isDarkMode ? "dark" : "light",
+        },
+      );
     });
     pusher.user.watchlist.bind("online", watchlistEventHandler);
     pusher.user.watchlist.bind("offline", watchlistEventHandler);
-    // chats.map((chat) => {
-    //   const channel = pusher.subscribe(`presence-room@${chat.id}`);
-    //   channel.bind(Events.NEW_CHANNEL_MESSAGE, (data: any) =>
-    //     console.warn(data)
-    //   );
-    // });
 
     return () => {
-      // chats?.map((chat) => pusher.unsubscribe(`presence-room@${chat.id}`));
+      pusher.user.watchlist.unbind_all();
       pusher.user.unbind_all();
+      pusher.disconnect();
     };
-  }, [pusher, chats]);
+  }, [pusher]);
 
   return (
     <main className="application">
+      <GlobalChannelListener />
+      {/* <button
+        className="absolute right-0 top-0 z-20 m-5 cursor-pointer rounded-circle bg-surface-dark p-4 dark:bg-surface-light"
+        onClick={toggle}
+      >
+        {isDarkMode ? "🌑" : "☀️"}
+      </button> */}
       <SideBar />
       <div
         id="main-window"
@@ -79,23 +106,29 @@ function ChatLayout({ children }: { children: React.ReactNode }) {
       >
         {children}
       </div>
+      <Info show={showInfo} chatID={chatID} />
     </main>
   );
 }
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const { data, update } = useSession();
-  const pusher = getPusher(data?.user);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
   useEffect(() => {
-    update().then(() => setLoading(false));
+    if (!data?.user) {
+      router.replace("/login");
+    } else update().then(() => setLoading(false));
   }, []);
 
   if (loading) return null;
 
   return (
-    <PusherProvider {...pusher}>
-      <ChatLayout>{children}</ChatLayout>
+    <PusherProvider params={data?.user}>
+      <ChatProvider>
+        <ToastContainer />
+        <ChatLayout>{children}</ChatLayout>
+      </ChatProvider>
     </PusherProvider>
   );
 }

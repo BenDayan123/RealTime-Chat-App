@@ -4,7 +4,7 @@ import { cn } from "@lib/utils";
 import { MdClose, MdCheck } from "react-icons/md";
 
 const style =
-  "w-12 h-12 aspect-square group rounded-full bg-surface-light dark:bg-surface-dark hover:bg-surface-light hover:dark:bg-surface-dark";
+  "w-12 h-12 aspect-square group flex-center rounded-full bg-surface-light dark:bg-surface-dark hover:bg-surface-light hover:dark:bg-surface-dark";
 const iconsBaseStyle = "fill-onSurface-light dark:fill-onSurface-dark";
 
 interface Props {

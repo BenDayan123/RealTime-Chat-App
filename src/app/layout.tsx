@@ -1,8 +1,9 @@
 import { getServerSession } from "next-auth";
 import NextAuthProvider from "./auth-provider";
 import MainApp from "./main";
-import "./globals.scss";
 import { authOptions } from "../pages/api/auth/[...nextauth]";
+import { EdgeStoreProvider } from "@lib/store";
+import "./globals.scss";
 
 export const metadata = {
   title: "Chat App",
@@ -16,7 +17,9 @@ export default async function RootLayout({
   const session = await getServerSession(authOptions);
   return (
     <NextAuthProvider session={session}>
-      <MainApp>{children}</MainApp>
+      <EdgeStoreProvider>
+        <MainApp>{children}</MainApp>
+      </EdgeStoreProvider>
     </NextAuthProvider>
   );
 }

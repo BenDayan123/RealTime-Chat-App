@@ -3,10 +3,15 @@ export interface IFriend {
   name: string;
   image: string;
   status?: IStatus;
+  friendship_status: FriendShipStatus;
+  type: "outgoing" | "ingoing";
 }
 
-export interface IUser extends IFriend {
-  email: string;
+export interface IUser {
+  id: string;
+  name: string;
+  image: string;
+  status?: IStatus;
 }
 
 export type IStatus = "online" | "offline";

@@ -7,9 +7,13 @@
   padding: 0;
   box-sizing: border-box;
   font-weight: normal;
+  text-align: start;
+  unicode-bidi: plaintext;
 }
 
 body {
+  position: relative;
+  overflow: hidden;
   width: 100vw;
   height: 100vh;
   max-width: 100vw;
@@ -17,6 +21,7 @@ body {
 }
 
 html{
+  overflow: hidden;
   &.dark{
     --epr-bg-color: #1f1f1f;
   }
@@ -26,20 +31,15 @@ html{
 }
 
 .gradient-background{
-  background: radial-gradient(at 74% 49%, hsla(23,88%,71%,1) 0px, transparent 50%),
-  radial-gradient(at 93% 30%, hsla(287,65%,68%,1) 0px, transparent 50%),
-  radial-gradient(at 36% 34%, hsla(331,90%,60%,1) 0px, transparent 50%),
-  radial-gradient(at 21% 64%, hsla(246,89%,68%,1) 0px, transparent 50%),
-  radial-gradient(at 4% 24%, hsla(14,69%,72%,1) 0px, transparent 50%),
-  radial-gradient(at 28% 48%, hsla(232,99%,77%,1) 0px, transparent 50%),
-  radial-gradient(at 87% 80%, hsla(340,72%,63%,1) 0px, transparent 50%);
-
-  background-image: url("https://lh3.googleusercontent.com/186ZGdDhTLrvBaobO6wvilzpbjD45K7I9ifjwvk9Qt2HetzkWX0W5BN3Vi0tMYKDQPa11rbghe1m1syRvVbZhkZDajHhxQNc9B_pcCBrVVGvMEOZc-k=w2400-rj");
-  background-size: cover;
-  scale: -1;
-  background-position: center center;
-  background-repeat: no-repeat;
-  filter: hue-rotate(110deg);
+  background-color:hsla(0,0%,100%,1);
+  background-image:
+  radial-gradient(at 43% 34%, hsla(28,100%,74%,1) 0px, transparent 50%),
+  radial-gradient(at 66% 35%, hsla(189,100%,56%,1) 0px, transparent 50%),
+  radial-gradient(at 0% 50%, hsla(355,100%,93%,1) 0px, transparent 50%),
+  radial-gradient(at 80% 50%, hsla(340,100%,76%,1) 0px, transparent 50%),
+  radial-gradient(at 23% 72%, hsla(22,100%,77%,1) 0px, transparent 50%),
+  radial-gradient(at 63% 64%, hsla(242,100%,70%,1) 0px, transparent 50%),
+  radial-gradient(at 36% 40%, hsla(343,100%,76%,1) 0px, transparent 50%);
 }
 
 ::-webkit-scrollbar {
@@ -57,5 +57,23 @@ html{
   // border-radius: 15px;
   &:hover{
     background: darken($color, 15%);
+  }
+}
+a{
+  @apply text-white hover:underline;
+}
+
+img{
+  @apply drag-none;
+}
+
+@layer utilities{
+  .flex-center{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .absolute-center{
+    @apply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
   }
 }

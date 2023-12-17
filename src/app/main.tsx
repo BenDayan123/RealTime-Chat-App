@@ -1,30 +1,30 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
-import { Sora } from "next/font/google";
+import { Varela_Round, Nunito } from "next/font/google";
+import { useDarkMode } from "@hooks/useDarkMode";
 
-const font = Sora({
+const varela_font = Varela_Round({
+  subsets: ["hebrew"],
+  weight: ["400"],
+});
+
+const nunito_font = Nunito({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["300", "400", "500", "600", "700", "800"],
 });
 
 export default function App({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState("dark");
-  const isDark = useMemo(() => theme === "dark", [theme]);
-
-  useEffect(() => {
-    Notification.requestPermission();
-  }, []);
+  const { isDarkMode } = useDarkMode(true);
 
   return (
-    <html lang="en" className={`${font.className} ${theme}`}>
-      <body suppressHydrationWarning={true}>
-        <button
-          className="absolute right-0 top-0 z-20 m-5 cursor-pointer rounded-circle bg-surface-dark p-4 dark:bg-surface-light"
-          onClick={() => setTheme(isDark ? "light" : "dark")}
-        >
-          {isDark ? "🌑" : "☀️"}
-        </button>
+    <html
+      lang="en"
+      className={`${varela_font.className} ${isDarkMode ? "dark" : "light"}`}
+    >
+      <body
+        suppressHydrationWarning={true}
+        suppressContentEditableWarning={true}
+      >
         {children}
       </body>
     </html>
