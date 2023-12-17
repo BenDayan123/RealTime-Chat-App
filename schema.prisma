@@ -1,7 +1,7 @@
 datasource db {
     provider = "mysql"
-    url      = "mysql://root:ZJaFfQsGcBua@localhost:3306/chat"
-    // url      = env("DATABASE_URL")
+    // url      = "mysql://root:ZJaFfQsGcBua@localhost:3306/chat"
+    url      = env("DATABASE_URL")
 }
 
 generator client {
