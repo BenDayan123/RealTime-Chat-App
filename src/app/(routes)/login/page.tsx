@@ -30,12 +30,12 @@ export default function LoginPage() {
             <Input name="email" icon={MdEmail} type="email" />
             <Input name="password" icon={MdOutlineLock} type="password" />
           </Form>
-          <p className="font-bold text-gray-700 dark:text-white">
-            Don't have an account?{" "}
-            <Link href="/sign-up" className="text-blue-500">
+          <div className="font-bold text-gray-700 dark:text-white">
+            Don&apos;t have an account?
+            <Link href="/sign-up" className="mx-1 text-blue-500">
               Sign up
             </Link>
-          </p>
+          </div>
         </div>
       </div>
     </div>

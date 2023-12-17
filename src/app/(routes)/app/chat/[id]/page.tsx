@@ -70,7 +70,7 @@ export default function ChatApp({ params: { id } }: Props) {
 
   useEffect(() => {
     setChatID(id);
-  }, [id]);
+  }, [setChatID, id]);
 
   useEffectOnce(() => {
     scrollToBottom();

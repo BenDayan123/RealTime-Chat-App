@@ -19,7 +19,6 @@ interface Props {
 }
 
 const MessageList: React.FC<Props> = ({ messages }) => {
-  if (!messages) return;
   const { chatID } = useChat();
   const { data: session } = useSession();
   const [batchedMessages, setBatchedMessages] = useState<string[]>([]);
@@ -43,7 +42,9 @@ const MessageList: React.FC<Props> = ({ messages }) => {
       setBatchedMessages([]);
     }, 700);
     return () => clearTimeout(timeOutID);
-  }, [batchedMessages]);
+  }, [batchedMessages, pusher?.connection.socket_id, updateChat]);
+
+  if (!messages) return;
 
   return (
     <>

@@ -77,20 +77,21 @@ const RecordButton: React.FC<Props> = ({
     setChunks([]);
   };
 
-  const handleStart = () => {
-    mediaRecorder?.start();
-    timer.reset();
-    timer.start();
-    onStartRecording && void onStartRecording();
-  };
-  const handleStop = () => {
-    mediaRecorder?.stop();
-    timer.pause();
-    onStopRecording && void onStopRecording();
-  };
-
   const handleRecording = useCallback(() => {
     if (!mediaRecorder) return;
+
+    const handleStart = () => {
+      mediaRecorder?.start();
+      timer.reset();
+      timer.start();
+      onStartRecording && void onStartRecording();
+    };
+    const handleStop = () => {
+      mediaRecorder?.stop();
+      timer.pause();
+      onStopRecording && void onStopRecording();
+    };
+
     mediaRecorder.state === "recording" ? handleStop() : handleStart();
   }, [mediaRecorder]);
 

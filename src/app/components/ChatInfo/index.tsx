@@ -29,9 +29,9 @@ const Info: React.FC<Props> = ({ show }) => {
         >
           {
             [
-              <InfoPage switchPage={(p) => setPage(p)} />,
-              <AddParticipantsPage switchPage={(p) => setPage(p)} />,
-              <EditGroupPage switchPage={(p) => setPage(p)} />,
+              <InfoPage switchPage={(p) => setPage(p)} key={0} />,
+              <AddParticipantsPage switchPage={(p) => setPage(p)} key={1} />,
+              <EditGroupPage switchPage={(p) => setPage(p)} key={2} />,
             ][page]
           }
         </motion.div>

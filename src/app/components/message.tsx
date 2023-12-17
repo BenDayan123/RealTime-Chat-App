@@ -41,14 +41,12 @@ const Message: React.FC<PropsWithChildren<Props>> = ({
   onView,
   showBG = true,
 }) => {
-  if (!children && !body) return null;
-
   const { ref, inView } = useInView({ triggerOnce: true });
   const { chatID } = useChat();
 
   useEffect(() => {
     onView && void onView(inView);
-  }, [inView]);
+  }, [inView, onView]);
 
   const embedLink = useCallback((link: string) => {
     const host = new URL(link).host;
@@ -85,7 +83,9 @@ const Message: React.FC<PropsWithChildren<Props>> = ({
         word
       ),
     );
-  }, [body]);
+  }, [body, embedLink]);
+
+  if (!children && !body) return null;
 
   return (
     <motion.div

@@ -50,7 +50,7 @@ export const PusherProvider: React.FC<PropsWithChildren<Props>> = ({
     return () => {
       pusherInstance.disconnect();
     };
-  }, []);
+  }, [params]);
 
   return (
     <PusherContext.Provider value={pusher}>{children}</PusherContext.Provider>

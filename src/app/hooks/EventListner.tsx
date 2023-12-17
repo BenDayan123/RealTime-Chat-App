@@ -23,6 +23,16 @@ export const GlobalChannelListener = () => {
       const channel = pusher.subscribe(`presence-room@${id}`);
       const key = ["conversion", id, session?.user.id];
 
+      const updateChat = (
+        key: QueryKey,
+        updater: (old: IConversion) => any,
+      ) => {
+        queryClient.setQueryData<IConversion>(key, (old) => {
+          if (!old) return null;
+          return { ...old, ...updater(old) };
+        });
+      };
+
       channel.bind(Events.NEW_CHANNEL_MESSAGE, (newMessage: IMessage) => {
         if (!newMessage) return;
         queryClient.setQueryData<InfiniteData<IMessage[]>>(
@@ -92,17 +102,7 @@ export const GlobalChannelListener = () => {
         (channel) => channel && channel.unbind_all().unsubscribe(),
       );
     };
-  }, [chatIDs, pusher]);
-
-  const updateChat = useCallback(
-    (key: QueryKey, updater: (old: IConversion) => any) => {
-      queryClient.setQueryData<IConversion>(key, (old) => {
-        if (!old) return null;
-        return { ...old, ...updater(old) };
-      });
-    },
-    [],
-  );
+  }, [chatIDs, pusher, session?.user.id, queryClient]);
 
   return null;
 };

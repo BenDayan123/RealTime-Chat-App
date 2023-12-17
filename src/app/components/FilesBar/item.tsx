@@ -1,6 +1,6 @@
 import { useChat } from "@hooks/useChat";
 import { cn } from "@lib/utils";
-import { memo, useCallback, useMemo } from "react";
+import { memo, useMemo } from "react";
 import { FaFileAudio } from "react-icons/fa";
 import { MdInsertDriveFile, MdVideoFile } from "react-icons/md";
 import { PiTrashFill, PiFileTextFill } from "react-icons/pi";
@@ -40,13 +40,14 @@ const RenderFile: React.FC<{ type: string; file: File }> = memo(
   },
 );
 
+RenderFile.displayName = "RenderFile";
 interface Props {
   fileState: FileState;
 }
 
 export const File: React.FC<Props> = ({ fileState }) => {
   const { file } = fileState;
-  const [type] = useMemo(() => file.type.split("/"), [fileState]);
+  const [type] = useMemo(() => file.type.split("/"), [fileState, file.type]);
   const { removeFile } = useChat();
 
   return (

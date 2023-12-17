@@ -95,7 +95,7 @@ export const MultiFileDropzone: React.FC<PropsWithChildren<InputProps>> = ({
 
   useEffect(() => {
     onError && onError(error ?? errorMessage);
-  }, [errorMessage, error]);
+  }, [errorMessage, error, onError]);
 
   return <div {...getRootProps({ className })}>{children}</div>;
 };

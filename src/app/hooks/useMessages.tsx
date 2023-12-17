@@ -80,7 +80,7 @@ export function useMessages(channel_id: string) {
       );
     });
     return () => void channel.unbind(Events.MESSAGE_SEEN);
-  }, [pusher]);
+  }, [pusher, channel_id, key, queryClient, session?.user.id]);
 
   return query;
 }

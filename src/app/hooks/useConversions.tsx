@@ -45,15 +45,19 @@ export function useConversions() {
     initialData: [],
   });
 
-  const moveChatToTop = useCallback((id: string) => {
-    queryClient.setQueryData<string[]>(
-      ["conversions", session?.user.id],
-      (old) => {
-        if (!old) return old;
-        return old.sort((x, y) => (x === id ? -1 : y === id ? 1 : 0));
-      },
-    );
-  }, []);
+  const moveChatToTop = useCallback(
+    (id: string) => {
+      queryClient.setQueryData<string[]>(
+        ["conversions", session?.user.id],
+        (old) => {
+          if (!old) return old;
+          return old.sort((x, y) => (x === id ? -1 : y === id ? 1 : 0));
+        },
+      );
+    },
+    [queryClient, session?.user.id],
+  );
+
   const conversions = useQueries({
     queries: chatIDs.map((id) => ({
       queryKey: ["conversion", id, session?.user.id],

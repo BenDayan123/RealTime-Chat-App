@@ -23,6 +23,7 @@ const ProfileStatus: React.FC<Props> = ({ status, ...props }) => {
     >
       <img
         className="pointer-events-none aspect-square h-full rounded-full object-cover"
+        alt=""
         {...rest}
       />
       {status && (

@@ -25,7 +25,7 @@ interface Props {
 const AddFriendForm: React.FC<Props> = ({ onSuccess }) => {
   const { data: session } = useSession();
   const ref = useRef<HTMLInputElement>(null);
-  const { data, error, mutate, isSuccess, isLoading } = useMutation<
+  const { error, mutate, isSuccess, isLoading } = useMutation<
     any,
     AxiosError<any>,
     Params
@@ -35,7 +35,7 @@ const AddFriendForm: React.FC<Props> = ({ onSuccess }) => {
 
   useEffect(() => {
     isSuccess && void onSuccess();
-  }, [isSuccess]);
+  }, [isSuccess, onSuccess]);
 
   return (
     <div className="text-gray-800 dark:text-white">

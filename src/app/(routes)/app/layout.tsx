@@ -31,19 +31,20 @@ function ChatLayout({ children }: { children: React.ReactNode }) {
   const { key } = useFriends({ status: "ACCEPTED" });
   const { moveToAccepted } = useFriend();
   const { showInfo, chatID } = useChat();
-  const watchlistEventHandler = useCallback((event: WatchListEvent) => {
-    const { name, user_ids } = event;
-    queryClient.setQueryData<IFriend[]>(key, (old) => {
-      return old?.map((friend: any) => ({
-        ...friend,
-        status: user_ids.includes(friend.id) ? name : friend.status,
-      }));
-    });
-  }, []);
 
   useEffect(() => {
     if (!pusher) return;
     pusher.signin();
+
+    function watchlistEventHandler(event: WatchListEvent) {
+      const { name, user_ids } = event;
+      queryClient.setQueryData<IFriend[]>(key, (old) => {
+        return old?.map((friend: any) => ({
+          ...friend,
+          status: user_ids.includes(friend.id) ? name : friend.status,
+        }));
+      });
+    }
 
     pusher.user.bind(Events.NEW_GROUP_CREATED, (group: { id: string }) => {
       queryClient.setQueryData<string[]>(
@@ -88,7 +89,7 @@ function ChatLayout({ children }: { children: React.ReactNode }) {
       pusher.user.unbind_all();
       pusher.disconnect();
     };
-  }, [pusher]);
+  }, [pusher, isDarkMode, moveToAccepted, queryClient, session?.user.id]);
 
   return (
     <main className="application">
@@ -119,7 +120,8 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     if (!data?.user) {
       router.replace("/login");
     } else update().then(() => setLoading(false));
-  }, []);
+    // eslint-disable-line react-hooks/exhaustive-deps
+  }, [data?.user]);
 
   if (loading) return null;
 
