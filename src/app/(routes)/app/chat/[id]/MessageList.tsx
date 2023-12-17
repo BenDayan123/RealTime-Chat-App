@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { DateSeparator } from "@components/DateSeparator";
 import { MediaGrid } from "@components/MediaGrid";
-import Message from "@components/Message";
+import { Message } from "@components/Message";
 import { usePusher } from "@hooks/usePusher";
 import { IMessage } from "@interfaces/message";
-import { groupBy, toTimeFormat } from "@lib/utils";
+import { groupBy } from "@lib/utils";
 import { useSession } from "next-auth/react";
 import axios from "axios";
 import mime from "mime";

@@ -28,7 +28,7 @@ interface Props {
   onView?: (inView: boolean) => void;
 }
 
-const Message: React.FC<PropsWithChildren<Props>> = ({
+export const Message: React.FC<PropsWithChildren<Props>> = ({
   children,
   mine,
   sender,
@@ -159,7 +159,6 @@ const Message: React.FC<PropsWithChildren<Props>> = ({
   );
 };
 
-export default memo(Message);
 // bg-blue-400
 // import {
 //   YouTubeEmbed,
