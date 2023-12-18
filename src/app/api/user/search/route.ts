@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
         },
         {
           email: {
-            search: `+${query} -gmail -.com`,
+            search: query,
           },
         },
       ],

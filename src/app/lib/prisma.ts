@@ -3,7 +3,7 @@ import { PrismaClient } from "@prisma/client/edge";
 import { withAccelerate } from "@prisma/extension-accelerate";
 
 const prismaClientSingleton = () => {
-  return new PrismaClient({ log: ["warn"] })
+  return new PrismaClient()
     .$extends({
       query: {
         friendship: {
@@ -77,6 +77,7 @@ const prismaClientSingleton = () => {
         },
       },
     })
+
     .$extends(withAccelerate());
 };
 

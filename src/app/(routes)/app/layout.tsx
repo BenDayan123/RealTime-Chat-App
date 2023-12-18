@@ -86,17 +86,12 @@ function ChatLayout({ children }: { children: React.ReactNode }) {
       pusher.user.unbind_all();
       pusher.disconnect();
     };
-  }, [pusher, isDarkMode, moveToAccepted, queryClient, session?.user.id]);
+    // eslint-disable-line react-hooks/exhaustive-deps
+  }, [pusher]);
 
   return (
     <main className="application">
       <GlobalChannelListener />
-      {/* <button
-        className="absolute right-0 top-0 z-20 m-5 cursor-pointer rounded-circle bg-surface-dark p-4 dark:bg-surface-light"
-        onClick={toggle}
-      >
-        {isDarkMode ? "🌑" : "☀️"}
-      </button> */}
       <SideBar />
       <div
         id="main-window"

@@ -102,7 +102,8 @@ export const GlobalChannelListener = () => {
         (channel) => channel && channel.unbind_all().unsubscribe(),
       );
     };
-  }, [chatIDs, pusher, session?.user.id, queryClient]);
+    // eslint-disable-line react-hooks/exhaustive-deps
+  }, [pusher, session?.user.id]);
 
   return null;
 };
