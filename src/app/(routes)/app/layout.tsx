@@ -2,9 +2,8 @@
 
 import SideBar from "@components/sidebar";
 import { IFriend, IStatus } from "@interfaces/user";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Events } from "@lib/events";
-import { motion } from "framer-motion";
 import { useFriend, useFriends } from "@hooks/useFriends";
 import { useQueryClient } from "@tanstack/react-query";
 import { ToastContainer, toast } from "react-toastify";
@@ -14,7 +13,6 @@ import { ChatProvider, useChat } from "@hooks/useChat";
 import { GlobalChannelListener } from "@hooks/EventListner";
 import { useRouter } from "next/navigation";
 import { useDarkMode } from "@hooks/useDarkMode";
-import Info from "@components/ChatInfo";
 import "react-toastify/dist/ReactToastify.css";
 import "./style.scss";
 
@@ -30,7 +28,6 @@ function ChatLayout({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
   const { key } = useFriends({ status: "ACCEPTED" });
   const { moveToAccepted } = useFriend();
-  const { showInfo, chatID } = useChat();
 
   useEffect(() => {
     if (!pusher) return;
@@ -107,21 +104,24 @@ function ChatLayout({ children }: { children: React.ReactNode }) {
       >
         {children}
       </div>
-      <Info show={showInfo} chatID={chatID} />
     </main>
   );
 }
 
 export default function Providers({ children }: { children: React.ReactNode }) {
-  const { data, update } = useSession();
-  const [loading, setLoading] = useState(true);
   const router = useRouter();
-  useEffect(() => {
-    if (!data?.user) {
+  const { data, update } = useSession({
+    required: true,
+    onUnauthenticated() {
       router.replace("/login");
-    } else update().then(() => setLoading(false));
+    },
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    update().then(() => setLoading(false));
     // eslint-disable-line react-hooks/exhaustive-deps
-  }, [data?.user]);
+  }, [update]);
 
   if (loading) return null;
 

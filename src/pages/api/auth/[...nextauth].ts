@@ -96,31 +96,3 @@ export const authOptions: NextAuthOptions = {
 };
 
 export default NextAuth(authOptions);
-
-// GoogleProvider({
-//   clientId: GOOGLE_CLIENT_ID,
-//   clientSecret: GOOGLE_CLIENT_SECRET,
-//   profile(profile) {
-//     return {
-//       id: profile.sub,
-//       name: profile.name,
-//       email: profile.email,
-//       image: profile.picture.replace(/s=\d+/, "s=600"),
-//     };
-//   },
-//   checks: ["none"],
-// }),
-// Auth0Provider({
-//   clientId: AUTH0_CLIENT_ID,
-//   clientSecret: AUTH0_CLIENT_SECRET,
-//   issuer: AUTH0_ISSUER,
-// }),
-// FacebookProvider({
-//   clientId: FACEBOOK_CLIENT_ID,
-//   clientSecret: FACEBOOK_CLIENT_SECRET,
-// }),
-// TwitterProvider({
-//   clientId: TWITTER_CLIENT_ID,
-//   clientSecret: TWITTER_CLIENT_SECRET,
-//   version: "2.0",
-// }),

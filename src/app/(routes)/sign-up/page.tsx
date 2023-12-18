@@ -15,13 +15,22 @@ export default function LoginPage() {
     e.preventDefault();
     const form = new FormData(e.currentTarget);
     const profile = form.get("profile") as File;
-    const { url } = await edgestore.publicImages.upload({ file: profile });
+    const { url } = await edgestore.publicImages.upload({
+      file: profile,
+      options: { temporary: true },
+    });
     const data = Object.fromEntries(form.entries());
     signIn("sign-up", {
       ...data,
       profile: url,
       callbackUrl: `${window.location.origin}/app/friends`,
-    });
+    })
+      .then(() => {
+        edgestore.publicImages.confirmUpload({ url });
+      })
+      .catch(() => {
+        edgestore.publicImages.delete({ url });
+      });
   };
   return (
     <div className="h-screen w-screen bg-[url('https://uploads-ssl.webflow.com/5b61d6a92898676332523d67/5b631108ff62e8368acd3a2d_12.%20Tumbleweed.jpg')] bg-cover bg-no-repeat">

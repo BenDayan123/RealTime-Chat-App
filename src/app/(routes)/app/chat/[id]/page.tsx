@@ -19,6 +19,7 @@ import MessageList from "./MessageList";
 import { useDarkMode } from "@hooks/useDarkMode";
 import { cn } from "@lib/utils";
 import AvatarsGroup from "@components/AvatarsGroup";
+import Info from "@components/ChatInfo";
 
 interface Props {
   params: {
@@ -36,7 +37,7 @@ export default function ChatApp({ params: { id } }: Props) {
     () => data?.pages.reduce((prev, curr) => [...curr, ...prev], []),
     [data],
   );
-  const { files, setChatID, setFiles, setShow } = useChat();
+  const { files, setChatID, setFiles, setShow, showInfo } = useChat();
   const uploadedFiles = useMemo(
     () => files.filter((file) => typeof file.progress == "number"),
     [files],
@@ -93,6 +94,7 @@ export default function ChatApp({ params: { id } }: Props) {
       onChange={(files) => setFiles(files)}
       onFilesAdded={async (addedFiles) => setFiles([...files, ...addedFiles])}
     >
+      {is_group && <Info show={showInfo} chatID={id} />}
       <div
         className={cn(
           "gradient-background pointer-events-none absolute left-0 top-0 z-0 h-full w-full blur-3xl",

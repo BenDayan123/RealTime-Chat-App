@@ -1,7 +1,8 @@
 datasource db {
-    provider = "mysql"
-    // url      = "mysql://root:ZJaFfQsGcBua@localhost:3306/chat"
-    url      = env("DATABASE_URL")
+    provider  = "postgresql"
+    url       = "prisma://accelerate.prisma-data.net/?api_key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlfa2V5IjoiOWZmMzk5MTEtZDNmMi00OTM1LTlmNDUtMWI0NjI0OGRkZGE4IiwidGVuYW50X2lkIjoiZDdjYTM5ODkwYTU0OWQ2MTM1ZjQ0ZjhkM2M4YTg3MDE1ZDhiODc4NmE3MjYyOGE2Mjk3NjZlZjczMTVmMGQ2NyIsImludGVybmFsX3NlY3JldCI6ImZjYjA5ODBiLTc0NzktNDgzNy1iZTU0LTAxYTllZjRiODBlYyJ9.pK5RI2iH7-ES4zYktBmbQjfjvBhlvhYOv9nFbWTxi_A"
+    directUrl = "postgresql://BenDayan123:6HCWt0dixyjq@ep-winter-limit-82852307.il-central-1.aws.neon.tech/Chat?sslmode=require"
+    //     url      = env("DATABASE_URL")
 }
 
 generator client {
@@ -54,9 +55,9 @@ model User {
     AdminGroups Conversion[] @relation(name: "admins")
     MessageSeen Message[]    @relation("seenUsers")
 
-    @@fulltext([name])
-    @@fulltext([email])
-    @@fulltext([name, email])
+    // @@fulltext([name])
+    // @@fulltext([email])
+    // @@fulltext([name, email])
 }
 
 model Friendship {
@@ -87,7 +88,7 @@ enum MessageType {
 model Conversion {
     id          String    @id @default(cuid())
     members     User[]
-    description String?   @db.LongText
+    description String?   @db.Text
     is_group    Boolean   @default(false)
     profile     String?
     name        String?
