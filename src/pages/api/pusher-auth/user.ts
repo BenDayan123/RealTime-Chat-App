@@ -1,21 +1,11 @@
 import Pusher from "pusher";
 import { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "@lib/prisma";
-
-const { PUSHER_APP_ID, PUSHER_CLIENT_KEY, PUSHER_SECERT, PUSHER_CLUSTER } =
-  process.env;
-
-const pusher = new Pusher({
-  appId: PUSHER_APP_ID,
-  key: PUSHER_CLIENT_KEY,
-  secret: PUSHER_SECERT,
-  cluster: PUSHER_CLUSTER,
-  useTLS: false,
-});
+import { pusher } from "@lib/socket";
 
 export default async function UserAuthPusherHandler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   const { socket_id, channel_name, ...user } = req.body;
   const { id } = user;

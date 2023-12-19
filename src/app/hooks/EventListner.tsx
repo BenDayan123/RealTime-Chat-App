@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
+import { useEffect } from "react";
 import { IMessage } from "@interfaces/message";
 import { IConversion } from "@interfaces/conversion";
 import { useConversions } from "./useConversions";
@@ -8,7 +8,6 @@ import { Events } from "@lib/events";
 import { InfiniteData, QueryKey, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { usePusher } from "./usePusher";
-// import { usePusher } from "@harelpls/use-pusher";
 
 export const GlobalChannelListener = () => {
   const { chatIDs } = useConversions();
@@ -18,7 +17,6 @@ export const GlobalChannelListener = () => {
 
   useEffect(() => {
     if (!pusher) return;
-
     const channels = chatIDs.map((id) => {
       const channel = pusher.subscribe(`presence-room@${id}`);
       const key = ["conversion", id, session?.user.id];
@@ -80,6 +78,7 @@ export const GlobalChannelListener = () => {
       });
       channel.bind(Events.USER_TYPING, (data: { name: string }) => {
         const { name } = data;
+        console.log(data);
         updateChat(key, () => ({ liveAction: { user: name, type: "TYPING" } }));
       });
       channel.bind(Events.USER_STOP_TYPING, () => {
@@ -103,7 +102,7 @@ export const GlobalChannelListener = () => {
       );
     };
     // eslint-disable-line react-hooks/exhaustive-deps
-  }, [pusher, session?.user.id]);
+  }, [pusher, chatIDs]);
 
   return null;
 };

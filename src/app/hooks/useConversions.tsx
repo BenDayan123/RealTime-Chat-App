@@ -55,7 +55,7 @@ export function useConversions() {
         },
       );
     },
-    [queryClient, session?.user.id],
+    [session?.user.id],
   );
 
   const conversions = useQueries({

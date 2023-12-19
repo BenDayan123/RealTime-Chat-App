@@ -1,18 +1,7 @@
-import Pusher from "pusher";
 import { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "@lib/prisma";
 import { ExtractChannelID } from "@lib/utils";
-
-const { PUSHER_APP_ID, PUSHER_CLIENT_KEY, PUSHER_SECERT, PUSHER_CLUSTER } =
-  process.env;
-
-const pusher = new Pusher({
-  appId: PUSHER_APP_ID,
-  key: PUSHER_CLIENT_KEY,
-  secret: PUSHER_SECERT,
-  cluster: PUSHER_CLUSTER,
-  useTLS: false,
-});
+import { pusher } from "@lib/socket";
 
 export default async function ChannelAuthPusherHandler(
   req: NextApiRequest,

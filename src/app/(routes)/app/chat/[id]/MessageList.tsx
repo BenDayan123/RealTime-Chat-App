@@ -42,7 +42,7 @@ const MessageList: React.FC<Props> = ({ messages }) => {
       setBatchedMessages([]);
     }, 700);
     return () => clearTimeout(timeOutID);
-  }, [batchedMessages, pusher?.connection.socket_id, updateChat]);
+  }, [batchedMessages]);
 
   if (!messages) return;
 

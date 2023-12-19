@@ -23,7 +23,7 @@ export default function App({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     pathname === "/" && router.replace("/app");
-  }, [router, pathname]);
+  }, [pathname]);
 
   return (
     <html

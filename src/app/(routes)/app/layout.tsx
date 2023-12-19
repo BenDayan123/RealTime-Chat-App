@@ -9,9 +9,9 @@ import { useQueryClient } from "@tanstack/react-query";
 import { ToastContainer, toast } from "react-toastify";
 import { useSession } from "next-auth/react";
 import { PusherProvider, usePusher } from "@hooks/usePusher";
-import { ChatProvider, useChat } from "@hooks/useChat";
+import { ChatProvider } from "@hooks/useChat";
 import { GlobalChannelListener } from "@hooks/EventListner";
-import { useRouter } from "next/navigation";
+import { useRouter as useNav } from "next/navigation";
 import { useDarkMode } from "@hooks/useDarkMode";
 import "react-toastify/dist/ReactToastify.css";
 import "./style.scss";
@@ -49,7 +49,6 @@ function ChatLayout({ children }: { children: React.ReactNode }) {
         (old) => (old ? [...old, group.id] : []),
       );
     });
-
     pusher.user.bind(Events.NEW_FRIEND_REQUEST, (request: any) => {
       queryClient.setQueryData<IFriend[]>(
         ["friends", "PENDING", session?.user.id],
@@ -57,11 +56,13 @@ function ChatLayout({ children }: { children: React.ReactNode }) {
           return [...(old || []), request.user];
         },
       );
-      toast(`${request.user.name} send you a friend request!`, {
-        position: "bottom-left",
-        progress: undefined,
-        theme: isDarkMode ? "dark" : "light",
-      });
+      if (request.type === "ingoing") {
+        toast(`${request.user.name} send you a friend request!`, {
+          position: "bottom-left",
+          progress: undefined,
+          theme: isDarkMode ? "dark" : "light",
+        });
+      }
     });
     pusher.user.bind(Events.FRIEND_STATUS_CHANGED, (request: any) => {
       const { status, friendship } = request;
@@ -104,7 +105,7 @@ function ChatLayout({ children }: { children: React.ReactNode }) {
 }
 
 export default function Providers({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
+  const router = useNav();
   const { data, update } = useSession({
     required: true,
     onUnauthenticated() {
@@ -116,7 +117,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     update().then(() => setLoading(false));
     // eslint-disable-line react-hooks/exhaustive-deps
-  }, [update]);
+  }, []);
 
   if (loading) return null;
 

@@ -15,7 +15,7 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: "signin",
-    newUser: "/app/friends",
+    newUser: "/sign-up",
   },
   adapter: PrismaAdapter(prisma as any) as any,
   providers: [
@@ -28,6 +28,9 @@ export const authOptions: NextAuthOptions = {
         const { email, password } = credentials ?? {};
         if (!email || !password) return null;
         const user = await prisma.user.findUnique({ where: { email } });
+        if (!user) {
+          throw new Error("Email or Password is not currect");
+        }
         if (
           user?.password &&
           !(await bcrypt.compare(password, user.password))

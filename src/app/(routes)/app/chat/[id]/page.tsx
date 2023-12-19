@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo } from "react";
-import MessageForm from "@components/message-form";
+import MessageForm from "@components/MessageForm";
 import { useMessages } from "@hooks/useMessages";
 import { useEffect, useRef } from "react";
 import { TypingBubble } from "@components/TypingBubble";
@@ -71,7 +71,7 @@ export default function ChatApp({ params: { id } }: Props) {
 
   useEffect(() => {
     setChatID(id);
-  }, [setChatID, id]);
+  }, [id]);
 
   useEffectOnce(() => {
     scrollToBottom();

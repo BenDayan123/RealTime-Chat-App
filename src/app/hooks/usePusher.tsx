@@ -44,7 +44,6 @@ export const PusherProvider: React.FC<PropsWithChildren<Props>> = ({
         params,
       },
     });
-
     setPusher(pusherInstance);
 
     return () => {

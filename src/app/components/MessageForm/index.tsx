@@ -90,7 +90,10 @@ const MessageForm: React.FC<Props> = ({ id }) => {
 
   return (
     <div
-      className={`relative flex items-center rounded-md border-2 border-blue-400 bg-surface-light px-4 py-2 dark:border-opacity-0 dark:bg-surface-dark`}
+      className={cn(
+        `relative flex items-center rounded-md border-2 border-blue-400 bg-surface-light px-4 py-2 dark:border-opacity-0 dark:bg-surface-dark`,
+        !pusher?.connection.state && "pointer-events-none opacity-60",
+      )}
     >
       <RecordButton
         onStartRecording={() =>
