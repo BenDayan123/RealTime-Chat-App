@@ -32,11 +32,7 @@ export const authOptions: NextAuthOptions = {
           user?.password &&
           !(await bcrypt.compare(password, user.password))
         ) {
-          throw new Error(
-            JSON.stringify({
-              errors: "Password is not currect",
-            }),
-          );
+          throw new Error("Password is not currect");
         }
         return user;
       },
@@ -56,8 +52,8 @@ export const authOptions: NextAuthOptions = {
         const user = await prisma.user.findUnique({ where: { email } });
         if (user) {
           if (user.name === username)
-            throw "There already user with that username";
-          throw "There already user with that email";
+            throw new Error("There already user with that username");
+          throw new Error("There already user with that email");
         }
         return await prisma.user.create({
           data: {

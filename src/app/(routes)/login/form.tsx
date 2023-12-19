@@ -1,5 +1,4 @@
 import { PropsWithChildren } from "react";
-import SubmitButton from "@components/buttons/button";
 // import SocialButton from "@components/buttons/social";
 // import GoogleLogo from "@images/logos/google.svg";
 // import TwitterLogo from "@images/logos/twitter.svg";
@@ -31,7 +30,6 @@ const Form: React.FC<PropsWithChildren<Props>> = ({
         </div> */}
         <form className="w-full" {...rest}>
           {children}
-          <SubmitButton type="submit" name="Sign In" />
         </form>
       </div>
     </>

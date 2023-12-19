@@ -7,9 +7,16 @@ import { signIn } from "next-auth/react";
 import { MdAccountCircle, MdEmail, MdOutlineLock } from "react-icons/md";
 import { useEdgeStore } from "@lib/store";
 import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import SubmitButton from "@components/buttons/button";
+import ErrorMessage from "(routes)/login/ErrorMessage";
 
 export default function LoginPage() {
   const { edgestore } = useEdgeStore();
+  const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -24,13 +31,16 @@ export default function LoginPage() {
       ...data,
       profile: url,
       callbackUrl: `${window.location.origin}/app/friends`,
-    })
-      .then(() => {
-        edgestore.publicImages.confirmUpload({ url });
-      })
-      .catch(() => {
-        edgestore.publicImages.delete({ url });
-      });
+    }).then((res) => {
+      if (!res) return;
+      const { ok, error } = res;
+      setError(error);
+      setLoading(false);
+      error
+        ? edgestore.publicImages.delete({ url })
+        : edgestore.publicImages.confirmUpload({ url });
+      ok && router.push("/app/friends");
+    });
   };
   return (
     <div className="h-screen w-screen bg-[url('https://uploads-ssl.webflow.com/5b61d6a92898676332523d67/5b631108ff62e8368acd3a2d_12.%20Tumbleweed.jpg')] bg-cover bg-no-repeat">
@@ -46,6 +56,8 @@ export default function LoginPage() {
             <Input name="username" icon={MdAccountCircle} type="text" />
             <Input name="email" icon={MdEmail} type="email" />
             <Input name="password" icon={MdOutlineLock} type="password" />
+            {error && <ErrorMessage>{error}</ErrorMessage>}
+            <SubmitButton type="submit" name="Sign In" loading={isLoading} />
           </Form>
           <div className="font-bold text-gray-700 dark:text-white">
             Have an account already?
