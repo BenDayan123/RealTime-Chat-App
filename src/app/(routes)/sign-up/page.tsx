@@ -33,13 +33,15 @@ export default function LoginPage() {
       redirect: false,
     }).then((res) => {
       if (!res) return;
-      const { ok, error } = res;
+      const { error } = res;
       setError(error);
       setLoading(false);
-      error
-        ? edgestore.publicImages.delete({ url })
-        : edgestore.publicImages.confirmUpload({ url });
-      ok && router.push("/app/friends");
+      if (error) {
+        edgestore.publicImages.delete({ url });
+      } else {
+        edgestore.publicImages.confirmUpload({ url });
+        router.push("/app/friends");
+      }
     });
   };
   return (
