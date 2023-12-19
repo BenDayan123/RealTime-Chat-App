@@ -30,7 +30,7 @@ export default function LoginPage() {
     signIn("sign-up", {
       ...data,
       profile: url,
-      callbackUrl: `${window.location.origin}/app/friends`,
+      redirect: false,
     }).then((res) => {
       if (!res) return;
       const { ok, error } = res;
