@@ -51,15 +51,12 @@ const MessageList: React.FC<Props> = ({ messages }) => {
       {messages.map((message, i) => {
         const { body, from, id, createdAt, seen, files, voice, type } = message;
         const mine = from.id === session?.user.id,
-          createdDate = new Date(createdAt),
           { images, other } = groupBy(files, ({ url }) =>
             mime.getType(url)?.split("/")[0] === "image" ? "images" : "other",
           ),
-          isConnected = i !== 0 && messages[i - 1].fromID === message.fromID,
           isAllSeen =
             (admins?.length || 0) + (members?.length || 0) <=
-            (seen?.length || 0) + 1,
-          time = dayjs(createdAt).format("HH:mm");
+            (seen?.length || 0) + 1;
         function onView(inView: boolean) {
           if (
             inView &&
@@ -69,26 +66,27 @@ const MessageList: React.FC<Props> = ({ messages }) => {
           )
             setBatchedMessages((prev) => [...prev, id]);
         }
+        const data = {
+          id,
+          type,
+          mine,
+          onView,
+          profile: from.image,
+          sender: from.name,
+          seen: isAllSeen,
+          time: dayjs(createdAt).format("HH:mm"),
+          isConnected: i !== 0 && messages[i - 1].fromID === message.fromID,
+        };
         return (
           <React.Fragment key={id}>
             <DateSeparator
-              date={createdDate}
+              date={new Date(createdAt)}
               prevDate={
                 i !== 0 ? new Date(messages[i - 1].createdAt) : undefined
               }
             />
             {voice && type === "AUDIO" && (
-              <Message
-                id={id}
-                type={type}
-                seen={isAllSeen}
-                mine={mine}
-                showBG={false}
-                sender={from.name}
-                onView={onView}
-                isConnected={isConnected}
-                time={time}
-              >
+              <Message {...data} showBG={false}>
                 <VoicePlayer
                   audio={voice.url}
                   className="bg-surface-light dark:bg-surface-dark"
@@ -96,50 +94,16 @@ const MessageList: React.FC<Props> = ({ messages }) => {
               </Message>
             )}
             {images?.length > 0 && (
-              <Message
-                type={type}
-                id={id}
-                seen={isAllSeen}
-                mine={mine}
-                showBG={false}
-                sender={from.name}
-                onView={onView}
-                isConnected={isConnected}
-                time={time}
-              >
+              <Message {...data} showBG={false}>
                 <MediaGrid images={images} />
               </Message>
             )}
             {other?.map(({ url, id: fileID, size }) => (
-              <Message
-                mine={mine}
-                type={type}
-                time={time}
-                id={id}
-                key={fileID}
-                seen={isAllSeen}
-                showBG={false}
-                onView={onView}
-                isConnected={isConnected}
-                profile={from.image}
-                sender={from.name}
-              >
+              <Message key={fileID} showBG={false} {...data}>
                 <MessageFile url={url} size={size} />
               </Message>
             ))}
-            <Message
-              mine={mine}
-              type={type}
-              time={time}
-              id={id}
-              key={id}
-              seen={isAllSeen}
-              onView={onView}
-              isConnected={isConnected}
-              profile={from.image}
-              sender={from.name}
-              body={body}
-            />
+            <Message {...data} body={body} />
           </React.Fragment>
         );
       })}

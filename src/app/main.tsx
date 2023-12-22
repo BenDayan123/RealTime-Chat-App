@@ -1,6 +1,6 @@
 "use client";
 
-import { Varela_Round, Nunito } from "next/font/google";
+import { Varela_Round, Inter } from "next/font/google";
 import { useDarkMode } from "@hooks/useDarkMode";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -9,9 +9,10 @@ import { usePathname } from "next/navigation";
 const varela_font = Varela_Round({
   subsets: ["hebrew"],
   weight: ["400"],
+  display: "swap",
 });
 
-const nunito_font = Nunito({
+const inter_font = Inter({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700", "800"],
 });
@@ -28,7 +29,9 @@ export default function App({ children }: { children: React.ReactNode }) {
   return (
     <html
       lang="en"
-      className={`${varela_font.className} ${isDarkMode ? "dark" : "light"}`}
+      className={`${inter_font.className} ${varela_font.className} ${
+        isDarkMode ? "dark" : "light"
+      }`}
     >
       <body
         suppressHydrationWarning={true}

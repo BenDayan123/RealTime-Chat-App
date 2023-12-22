@@ -34,7 +34,12 @@ export const CreateGroupForm: React.FC<Props> = ({
 
   const handleAction = async (form: FormData) => {
     const image = form.get("image") as File;
-    const { url } = await edgestore.publicFiles.upload({ file: image });
+    const { url } = await edgestore.publicFiles.upload({
+      file: image,
+      input: {
+        uuid: Math.random().toString(36).slice(-6),
+      },
+    });
     form.delete("add_user");
     const data = Object.fromEntries(form.entries());
     const res = await axios.post(`/api/user/${session?.user.id}/conversions`, {

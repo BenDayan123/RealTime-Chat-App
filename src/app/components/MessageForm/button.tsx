@@ -16,7 +16,7 @@ export const Button: React.FC<PropsWithChildren<Props>> = ({
     <i
       {...rest}
       className={cn(
-        "flex-center group relative cursor-pointer rounded-lg bg-onBG-light bg-opacity-0 p-3 hover:bg-opacity-30 active:scale-90 dark:bg-onBG-dark dark:bg-opacity-0 hover:dark:bg-opacity-10",
+        "flex-center group relative cursor-pointer rounded-lg bg-tran p-3 hover:bg-onBG-light/10 active:scale-90 hover:dark:bg-onBG-dark/10",
         className,
       )}
     >

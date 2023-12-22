@@ -14,6 +14,7 @@ import { Button } from "./button";
 import { UploadVoiceMessage } from "@actions/message";
 import { useSession } from "next-auth/react";
 import { useChat } from "@hooks/useChat";
+import LineSpinner from "@components/loaders/lineSpinner";
 
 const fileType = "webm";
 const mimeType = `audio/${fileType}`;
@@ -32,6 +33,7 @@ const RecordButton: React.FC<Props> = ({
   const timer = useTimer();
   const [blob, setBlob] = useState<Blob>();
   const { edgestore } = useEdgeStore();
+  const [loading, setLoading] = useState(false);
   const [, setChunks] = useState<Blob[]>([]);
   const { data: session } = useSession();
   const { chatID } = useChat();
@@ -64,9 +66,13 @@ const RecordButton: React.FC<Props> = ({
 
   const handleUploading = async () => {
     if (!blob) return;
+    setLoading(true);
     const file = new File([blob], `${UUID()}.${fileType}`);
     const { uploadedAt, size, url } = await edgestore.publicFiles.upload({
       file,
+      input: {
+        uuid: Math.random().toString(36).slice(-6),
+      },
     });
     await UploadVoiceMessage({
       voice: { uploadedAt, size, url },
@@ -75,6 +81,7 @@ const RecordButton: React.FC<Props> = ({
     });
     setBlob(undefined);
     setChunks([]);
+    setLoading(false);
   };
 
   const handleRecording = useCallback(() => {
@@ -147,10 +154,14 @@ const RecordButton: React.FC<Props> = ({
       </div>
       {blob && (
         <Button onClick={() => handleUploading()}>
-          <MdSend
-            size={25}
-            className="fill-onBG-light opacity-60 group-hover:opacity-100 dark:fill-onBG-dark"
-          />
+          {loading ? (
+            <LineSpinner className="p-0" size={25} />
+          ) : (
+            <MdSend
+              size={25}
+              className="fill-onBG-light opacity-60 group-hover:opacity-100 dark:fill-onBG-dark"
+            />
+          )}
         </Button>
       )}
     </div>

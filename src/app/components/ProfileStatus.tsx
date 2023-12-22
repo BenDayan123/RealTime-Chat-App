@@ -27,7 +27,7 @@ const ProfileStatus: React.FC<Props> = ({ status, ...props }) => {
         {...rest}
       />
       {status && (
-        <div className="absolute -bottom-[6px] -right-[6px] rounded-full bg-inherit p-[4px] transition-none">
+        <div className="absolute -bottom-[6px] -right-[6px] rounded-full bg-inherit bg-opacity-100 p-[4px] transition-none">
           <div
             className={cn(
               "aspect-square w-3 rounded-full",

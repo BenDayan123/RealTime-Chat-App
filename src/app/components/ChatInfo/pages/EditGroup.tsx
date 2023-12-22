@@ -76,7 +76,7 @@ export function EditGroupPage({ switchPage }: Params) {
         <Button
           onClick={() => switchPage(0)}
           icon={
-            <MdArrowBack className="fill-gray-800 dark:fill-white" size={20} />
+            <MdArrowBack className="fill-gray-900 dark:fill-white" size={20} />
           }
           className={buttonStyle}
         />
@@ -102,6 +102,7 @@ export function EditGroupPage({ switchPage }: Params) {
           minRows={1}
           rows={1}
           maxRows={10}
+          placeholder="Description"
           defaultValue={description}
           onChange={(e) => setDescription(e.currentTarget.value)}
           className="w-full resize-none rounded-lg bg-background-light p-3 text-onBG-light outline-none dark:bg-background-dark dark:text-onBG-dark"

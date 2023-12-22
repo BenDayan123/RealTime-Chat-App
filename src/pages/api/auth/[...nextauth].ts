@@ -15,7 +15,7 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: "signin",
-    newUser: "/sign-up",
+    newUser: "/auth/sign-up",
   },
   adapter: PrismaAdapter(prisma as any) as any,
   providers: [
@@ -76,7 +76,7 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user, trigger, session }) {
+    async jwt({ token, user }) {
       // if(trigger === "update"){
       //   return { ...token, ...session };
       // }

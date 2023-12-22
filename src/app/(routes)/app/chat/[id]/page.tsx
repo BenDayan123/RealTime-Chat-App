@@ -102,7 +102,7 @@ export default function ChatApp({ params: { id } }: Props) {
         )}
       ></div>
       <ChatTitle
-        onClick={() => setShow((prev) => !prev)}
+        onClick={is_group ? () => setShow((prev) => !prev) : undefined}
         image={(is_group ? profile : members[0].image) ?? ""}
         title={is_group ? chat.name : members[0].name}
       />

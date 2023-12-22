@@ -27,7 +27,7 @@ const Item: React.FC<PropsWithChildren<Props>> = ({
       onClick={() => navTo && router.push(navTo)}
       className={cn(
         `flex cursor-pointer select-none items-center
-       gap-4 rounded-lg px-6 py-4 text-onBG-light hover:bg-background-light dark:text-onBG-dark hover:dark:bg-background-dark`,
+       gap-4 rounded-lg px-6 py-3 text-onBG-light hover:bg-background-light dark:text-onBG-dark hover:dark:bg-background-dark`,
         pathname === navTo && "bg-onBG-dark dark:bg-onBG-light",
         className,
       )}

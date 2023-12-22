@@ -50,7 +50,7 @@ export function AddParticipantsPage({ switchPage }: Params) {
       <Button
         onClick={() => switchPage(0)}
         icon={
-          <MdArrowBack className="fill-gray-800 dark:fill-white" size={20} />
+          <MdArrowBack className="fill-gray-900 dark:fill-white" size={20} />
         }
         className={buttonStyle}
       />

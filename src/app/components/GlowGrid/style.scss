@@ -1,0 +1,9 @@
+.grid{
+    --mask-image: radial-gradient(50% 65% at top center, black, transparent); 
+    mask-image: var(--mask-image);
+    -webkit-mask-image: var(--mask-image);
+    opacity: 40%;
+    position: absolute;
+    z-index: 1;
+    top: -2px;
+}

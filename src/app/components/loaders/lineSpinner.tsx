@@ -1,13 +1,15 @@
 "use client";
 
 import { useDarkMode } from "@hooks/useDarkMode";
+import { cn } from "@lib/utils";
 import { useEffect } from "react";
 
 interface Props {
   size?: string | number;
+  className?: string;
 }
 
-export default function Loading({ size = "40" }: Props) {
+export default function Loading({ size = "40", className }: Props) {
   const { isDarkMode } = useDarkMode();
 
   useEffect(() => {
@@ -19,7 +21,7 @@ export default function Loading({ size = "40" }: Props) {
   }, []);
 
   return (
-    <div className="flex-center w-full p-3">
+    <div className={cn("flex-center w-full p-3", className)}>
       <l-line-spinner
         size={size}
         stroke="3"

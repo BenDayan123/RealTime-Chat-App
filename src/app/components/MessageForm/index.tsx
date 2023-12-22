@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import axios from "axios";
 import RecordButton from "./recorder";
+import LineSpinner from "@components/loaders/lineSpinner";
 import TextareaAutosize from "react-textarea-autosize";
 import EmojiPicker from "emoji-picker-react";
 import { MdEmojiEmotions, MdSend } from "react-icons/md";
@@ -24,21 +25,30 @@ const IconStyle =
 
 const MessageForm: React.FC<Props> = ({ id }) => {
   const { isDarkMode } = useDarkMode(true);
+  const [loading, setLoading] = useState(false);
   const { body, files, setBody, updateFileProgress, cleanChat } = useChat();
   const { edgestore } = useEdgeStore();
   const [showEmojis, setEmojis] = useState(false);
   const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout>();
   const { data: session } = useSession();
+  const textArea = useRef<HTMLTextAreaElement>(null);
   const pusher = usePusher();
   const channel = pusher?.channel(`presence-room@${id}`);
   const canSend = useMemo(() => !!body || files.length > 0, [body, files]);
 
   async function SendMessage() {
     if (!canSend) return;
+    setLoading(true);
     const uploadedFiles = await Promise.all(
       files.map((fileState) =>
         edgestore.publicFiles.upload({
           file: fileState.file,
+          input: {
+            uuid: Math.random().toString(36).slice(-6),
+          },
+          options: {
+            manualFileName: fileState.file.name,
+          },
           onProgressChange: (progress) => {
             updateFileProgress(fileState.key, progress);
           },
@@ -51,6 +61,7 @@ const MessageForm: React.FC<Props> = ({ id }) => {
       files: uploadedFiles,
       body,
     });
+    setLoading(false);
     cleanChat();
   }
 
@@ -78,14 +89,13 @@ const MessageForm: React.FC<Props> = ({ id }) => {
   }
 
   function handleInput(e: React.FormEvent<HTMLTextAreaElement>) {
-    setBody(e.currentTarget.value);
+    const { value } = e.currentTarget;
+    setBody(value);
     if (!typingTimeout) {
       channel?.trigger(Events.USER_TYPING, { name: session?.user.name });
-      stopTypingHandler();
-    } else {
-      clearTimeout(typingTimeout);
-      stopTypingHandler();
-    }
+    } else clearTimeout(typingTimeout);
+
+    stopTypingHandler();
   }
 
   return (
@@ -104,6 +114,7 @@ const MessageForm: React.FC<Props> = ({ id }) => {
       <TextareaAutosize
         value={body}
         minRows={1}
+        ref={textArea}
         rows={1}
         maxRows={10}
         onKeyDown={handleKeyDown}
@@ -115,13 +126,18 @@ const MessageForm: React.FC<Props> = ({ id }) => {
         <MdEmojiEmotions className={IconStyle} size={25} />
       </Button>
       <Button onClick={SendMessage}>
-        <MdSend
-          size={25}
-          className={cn(
-            IconStyle,
-            !canSend && "cursor-not-allowed opacity-10 group-hover:opacity-10",
-          )}
-        />
+        {loading ? (
+          <LineSpinner className="p-0" size={25} />
+        ) : (
+          <MdSend
+            size={25}
+            className={cn(
+              IconStyle,
+              !canSend &&
+                "cursor-not-allowed opacity-10 group-hover:opacity-10",
+            )}
+          />
+        )}
       </Button>
       {showEmojis && (
         <div className="absolute -top-4 right-0 z-20 -translate-y-full">
@@ -137,3 +153,7 @@ const MessageForm: React.FC<Props> = ({ id }) => {
 };
 
 export default MessageForm;
+
+//Mention:
+// const lastTwo = s.slice(-2);
+// console.log(lastTwo == " @" || lastTwo == "@")

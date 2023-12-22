@@ -1,4 +1,5 @@
 import ProfileStatus from "@components/ProfileStatus";
+import { cn } from "@lib/utils";
 
 interface Props {
   title: string;
@@ -9,8 +10,10 @@ interface Props {
 const ChatTitle: React.FC<Props> = ({ title, image, onClick }) => {
   return (
     <header
-      className="relative z-10 flex w-full items-center gap-4 border-b-2 bg-surface-light bg-opacity-80
-        p-5 backdrop-blur dark:border-b-slate-200/10 dark:bg-surface-dark dark:bg-opacity-60"
+      className={cn(
+        "relative z-10 flex w-full items-center gap-4 border-b-2 bg-surface-light bg-opacity-80 p-5 backdrop-blur dark:border-b-slate-200/10 dark:bg-surface-dark dark:bg-opacity-60",
+        onClick && "cursor-pointer",
+      )}
       onClick={onClick}
     >
       {image && <ProfileStatus src={image} className="h-14" alt="" />}

@@ -84,7 +84,7 @@ const CellGrid: React.FC<
                 delayChildren: 0.3,
                 staggerChildren: 0.05,
               }}
-              className="h-3/4 origin-center rounded-lg"
+              className="aspect-auto h-1/2 origin-center rounded-2xl"
             />
           </motion.div>
         )}

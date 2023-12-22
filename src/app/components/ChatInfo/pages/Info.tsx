@@ -45,7 +45,7 @@ export function InfoPage({ switchPage }: Params) {
       <Button
         className={cn(buttonStyle, "absolute right-0 top-0 z-50 m-5")}
         onClick={() => switchPage(2)}
-        icon={<MdCreate size={25} />}
+        icon={<MdCreate size={25} className="fill-gray-900 dark:fill-white" />}
       />
       <div className="space-y-1">
         <img

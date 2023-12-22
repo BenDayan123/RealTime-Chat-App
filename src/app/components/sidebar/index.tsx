@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { MdCreate, MdPeopleAlt } from "react-icons/md";
+import { MdCreate, MdPeopleAlt, MdMoreHoriz } from "react-icons/md";
 import ConversationTab from "@components/ConversationTab";
 import { useSession } from "next-auth/react";
 import { useConversions } from "@hooks/useConversions";
@@ -14,6 +14,9 @@ import { Dialog } from "@components/Dialog";
 import { IUser } from "@interfaces/user";
 import { Switch } from "@components/inputs/switch";
 import { useDarkMode } from "@hooks/useDarkMode";
+import { buttonStyle } from "@components/ChatInfo/pages/AddParticipants";
+import Image from "next/image";
+import { cn } from "@lib/utils";
 
 const SideBar: React.FC = () => {
   const { conversions } = useConversions();
@@ -38,9 +41,11 @@ const SideBar: React.FC = () => {
           Friends
         </Item>
         <Button
-          className="aspect-square h-full w-fit"
+          className={cn(buttonStyle, "h-full w-auto rounded-lg")}
           onClick={() => setIsOpen(true)}
-          icon={<MdCreate size={20} />}
+          icon={
+            <MdCreate size={20} className="fill-gray-900 dark:fill-white" />
+          }
         />
       </ul>
       <div className="h-full max-h-full overflow-y-auto p-3">
@@ -62,13 +67,21 @@ const SideBar: React.FC = () => {
             );
           })}
       </div>
-      <div className="flex items-center justify-between p-3">
+      <div className="z-10 mx-auto my-3 flex h-16 w-fit max-w-[80%] items-center gap-4 rounded-full bg-white p-3 text-gray-800 dark:bg-gray-800/70 dark:text-gray-100">
         <ProfileStatus
           src={session?.user.image || ""}
+          status="online"
           alt=""
-          className="m-2 h-12 w-auto"
+          className="aspect-square h-full w-auto"
         />
-        <Switch checked={isDarkMode} onChange={toggle} />
+        <div className="flex-1">
+          <h1 className="font-bold">{session?.user.name}</h1>
+          <p className="text-sm opacity-70">{session?.user.email}</p>
+        </div>
+        <div className="cursor-pointer rounded-full p-1 hover:bg-gray-200/50 hover:dark:bg-gray-500/50">
+          {/* <MdMoreHoriz clasName="fill-gray-800 dark:fill-white" size={20} /> */}
+          <Switch checked={isDarkMode} onChange={toggle} />
+        </div>
       </div>
       <Dialog
         show={isOpen}

@@ -109,7 +109,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   const { data, update } = useSession({
     required: true,
     onUnauthenticated() {
-      router.replace("/login");
+      router.replace("/auth/login");
     },
   });
   const [loading, setLoading] = useState(true);
