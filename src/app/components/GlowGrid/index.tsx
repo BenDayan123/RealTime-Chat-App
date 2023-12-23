@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Logo from "../../icon.png";
 import "./style.scss";
 
 interface Props {}
@@ -39,7 +40,7 @@ const GridGlow: React.FC<Props> = () => {
         className="pointer-events-none absolute left-1/2 top-0 z-10 mt-5 aspect-auto -translate-x-1/2 drag-none"
         height={100}
         width={100}
-        src="/../../icon.png"
+        src={Logo}
         alt="icon"
         quality={100}
       />

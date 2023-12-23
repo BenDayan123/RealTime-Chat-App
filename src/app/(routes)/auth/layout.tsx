@@ -4,6 +4,7 @@ import GridGlow from "@components/GlowGrid";
 import { Switch } from "@components/inputs/switch";
 import { useDarkMode } from "@hooks/useDarkMode";
 import Image from "next/image";
+import Logo from "../../icon.png";
 
 export default function AuthLayout({
   children,
@@ -19,7 +20,7 @@ export default function AuthLayout({
           className="aspect-auto rounded-full"
           height={55}
           width={55}
-          src="/../../icon.png"
+          src={Logo}
           alt="icon"
           quality={100}
         />
