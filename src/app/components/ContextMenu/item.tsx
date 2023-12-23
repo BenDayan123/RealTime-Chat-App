@@ -26,7 +26,7 @@ export const Item: React.FC<PropsWithChildren<Props>> = ({
       <div
         {...rest}
         className={cn(
-          "flex cursor-pointer select-none items-center gap-1 rounded-md p-2 hover:bg-gray-700/10 dark:text-white dark:hover:bg-white/10",
+          "group flex cursor-pointer select-none items-center gap-1 rounded-md p-2 hover:bg-gray-700/10 dark:text-white dark:hover:bg-white/10",
           className,
         )}
       >

@@ -37,7 +37,7 @@ export default function ChatApp({ params: { id } }: Props) {
     () => data?.pages.reduce((prev, curr) => [...curr, ...prev], []),
     [data],
   );
-  const { files, setChatID, setFiles, setShow, showInfo } = useChat();
+  const { files, setChatID, setFiles, setShowInfo, showInfo } = useChat();
   const uploadedFiles = useMemo(
     () => files.filter((file) => typeof file.progress == "number"),
     [files],
@@ -67,7 +67,8 @@ export default function ChatApp({ params: { id } }: Props) {
       top: chatContainer.current.scrollHeight - pageYOffset.current,
       behavior: "instant",
     });
-  }, [messages, chatContainer]);
+    // [messages, chatContainer]
+  }, []);
 
   useEffect(() => {
     setChatID(id);
@@ -102,7 +103,7 @@ export default function ChatApp({ params: { id } }: Props) {
         )}
       ></div>
       <ChatTitle
-        onClick={is_group ? () => setShow((prev) => !prev) : undefined}
+        onClick={is_group ? () => setShowInfo((prev) => !prev) : undefined}
         image={(is_group ? profile : members[0].image) ?? ""}
         title={is_group ? chat.name : members[0].name}
       />

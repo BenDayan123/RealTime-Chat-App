@@ -101,7 +101,7 @@ const MessageForm: React.FC<Props> = ({ id }) => {
   return (
     <div
       className={cn(
-        `relative flex items-center rounded-md border-2 border-blue-400 bg-surface-light px-4 py-2 dark:border-opacity-0 dark:bg-surface-dark`,
+        `relative flex h-20 items-center overflow-hidden rounded-md border-2 border-blue-400 bg-surface-light px-4 py-2 dark:border-opacity-0 dark:bg-surface-dark`,
         !pusher?.connection.state && "pointer-events-none opacity-60",
       )}
     >
@@ -120,7 +120,7 @@ const MessageForm: React.FC<Props> = ({ id }) => {
         onKeyDown={handleKeyDown}
         onInput={handleInput}
         placeholder="Type a message..."
-        className="h-full w-full resize-none bg-tran px-3 text-onBG-light outline-none dark:text-onBG-dark"
+        className="max-h-full w-full resize-none bg-tran px-3 text-onBG-light outline-none dark:text-onBG-dark"
       />
       <Button onClick={EmojiToggle}>
         <MdEmojiEmotions className={IconStyle} size={25} />

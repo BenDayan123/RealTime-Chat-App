@@ -8,9 +8,11 @@ import { Events } from "@lib/events";
 import { InfiniteData, QueryKey, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { usePusher } from "./usePusher";
+import { useRouter } from "next/navigation";
 
 export const GlobalChannelListener = () => {
   const { chatIDs } = useConversions();
+  const router = useRouter();
   const queryClient = useQueryClient();
   const { data: session } = useSession();
   const pusher = usePusher();
@@ -49,6 +51,23 @@ export const GlobalChannelListener = () => {
             unseenCount: old.unseenCount + 1,
           }));
         }
+      });
+      channel.bind(Events.MEMBERS_REMOVED, (removedMembers: string[]) => {
+        if (removedMembers.includes(session?.user.id as string)) {
+          queryClient.removeQueries({
+            queryKey: ["conversion", id, session?.user.id],
+          });
+          channel.unsubscribe();
+          router.push("/app/friends");
+        } else
+          updateChat(key, (old) => ({
+            members: old.members.filter(
+              (member) => !removedMembers.includes(member.id),
+            ),
+            admins: old.admins.filter(
+              (admin) => !removedMembers.includes(admin.id),
+            ),
+          }));
       });
       channel.bind(Events.GROUP_EDITED, (data: any) => {
         updateChat(key, () => data);

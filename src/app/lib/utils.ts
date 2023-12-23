@@ -45,10 +45,13 @@ export const UUID = () =>
 export const groupBy = <T>(
   array: T[],
   predicate: (value: T, index: number, array: T[]) => string,
+  setter?: (value: T) => any,
 ) =>
   array.reduce(
     (acc, value, index, array) => {
-      (acc[predicate(value, index, array)] ||= []).push(value);
+      (acc[predicate(value, index, array)] ||= []).push(
+        setter ? setter(value) : value,
+      );
       return acc;
     },
     {} as { [key: string]: T[] },
@@ -93,4 +96,12 @@ export function normalizeUrl(url: string) {
 
 export function removeEmpty(obj: object) {
   return Object.fromEntries(Object.entries(obj).filter(([_, v]) => v != null));
+}
+
+export function groupAndCount<T>(arr: T[]) {
+  return arr.reduce((count: { [key: string]: number }, value: T) => {
+    const key = String(value);
+    count[key] = (count[key] || 0) + 1;
+    return count;
+  }, {});
 }

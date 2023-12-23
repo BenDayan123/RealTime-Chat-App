@@ -6,6 +6,7 @@ interface Props {}
 const GridGlow: React.FC<Props> = () => {
   return (
     <>
+      <div className="absolute left-1/2 top-0 h-[1px] w-1/3 -translate-x-1/2 bg-gradient-to-r from-tran via-black to-tran dark:via-white"></div>
       <div className="glow absolute left-1/2 top-0 h-[250px] w-[50%] -translate-x-1/2 -translate-y-1/2 rounded-circle bg-gradient-to-r from-blue-400 to-blue-700 blur-3xl dark:h-[150px]"></div>
       <svg
         stroke="white"

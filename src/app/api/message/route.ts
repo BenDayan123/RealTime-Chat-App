@@ -1,7 +1,7 @@
 import { IFile, MessageType } from "@interfaces/message";
 import { Events } from "@lib/events";
 import { prisma } from "@lib/prisma";
-import { ExtractChannelID } from "@lib/utils";
+import { ExtractChannelID, groupBy } from "@lib/utils";
 import { NextRequest, NextResponse } from "next/server";
 import url from "url";
 import { pusher } from "@lib/socket";
@@ -12,7 +12,7 @@ const MESSAGES_CHUNK = 10;
 
 export async function GET(req: Request) {
   const { channel_id, cursor } = url.parse(req.url, true).query;
-  const messages = await prisma.message.findMany({
+  const query = await prisma.message.findMany({
     where: {
       chatID: channel_id as string,
     },
@@ -31,6 +31,17 @@ export async function GET(req: Request) {
           image: true,
         },
       },
+      reactions: {
+        select: {
+          emoji: true,
+          user: {
+            select: {
+              name: true,
+              id: true,
+            },
+          },
+        },
+      },
       seen: {
         select: {
           id: true,
@@ -42,7 +53,20 @@ export async function GET(req: Request) {
       voice: true,
     },
   });
-  return NextResponse.json(messages.reverse());
+  const messages = query
+    .map((message) => {
+      const { reactions, ...rest } = message;
+      return {
+        ...rest,
+        reactions: groupBy(
+          reactions,
+          (reaction) => reaction.emoji,
+          (value) => value.user,
+        ),
+      };
+    })
+    .reverse();
+  return NextResponse.json(messages);
 }
 
 type IForm = {

@@ -60,6 +60,7 @@ export function useMessages(channel_id: string) {
         });
       },
     );
+
     channel.bind(Events.MESSAGES_DELETED, (data: string[]) => {
       const deletedMessage = new Set(data);
       queryClient.setQueryData<InfiniteData<IMessage[]>>(
@@ -79,8 +80,61 @@ export function useMessages(channel_id: string) {
         },
       );
     });
-    return () => void channel.unbind(Events.MESSAGE_SEEN);
-  }, [pusher, channel_id, key, queryClient, session?.user.id]);
+
+    channel.bind(Events.REACTION_ADDED, (data: any) => {
+      const { messageID, emoji, user } = data;
+      queryClient.setQueryData<InfiniteData<IMessage[]>>(key, (old) => {
+        if (!old) return old;
+        const updated = old.pages.map((page) =>
+          page.map((message) => {
+            if (message.id === messageID) {
+              return {
+                ...message,
+                reactions: {
+                  ...message.reactions,
+                  [emoji]: [...(message.reactions[emoji] ?? []), user],
+                },
+              };
+            }
+            return message;
+          }),
+        );
+        return { pages: updated, pageParams: old.pageParams };
+      });
+    });
+
+    channel.bind(Events.REACTION_REMOVED, (data: any) => {
+      const { messageID, emoji, userID } = data;
+      queryClient.setQueryData<InfiniteData<IMessage[]>>(key, (old) => {
+        if (!old) return old;
+        const updated = old.pages.map((page) =>
+          page.map((message) => {
+            if (message.id === messageID) {
+              const { reactions } = message;
+              return {
+                ...message,
+                reactions: {
+                  ...reactions,
+                  [emoji]: reactions[emoji].filter(
+                    (user) => user.id !== userID,
+                  ),
+                },
+              };
+            }
+            return message;
+          }),
+        );
+        return { pages: updated, pageParams: old.pageParams };
+      });
+    });
+
+    return () => {
+      void channel.unbind(Events.MESSAGE_SEEN);
+      void channel.unbind(Events.MESSAGES_DELETED);
+      void channel.unbind(Events.REACTION_ADDED);
+      void channel.unbind(Events.REACTION_REMOVED);
+    };
+  }, [pusher, channel_id]);
 
   return query;
 }

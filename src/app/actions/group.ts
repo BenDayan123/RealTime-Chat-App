@@ -5,7 +5,6 @@ import { prisma } from "@lib/prisma";
 import { pusher } from "@lib/socket";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../pages/api/auth/[...nextauth]";
-import { removeEmpty } from "@lib/utils";
 
 export async function leaveGroup(chatID: string) {
   const session = await getServerSession(authOptions);
@@ -72,4 +71,30 @@ export async function addParticipants(chatID: string, participants: string[]) {
     },
   });
   await pusher.trigger(`presence-room@${chatID}`, Events.MEMBER_ADDED, users);
+}
+
+export async function removeParticipants(
+  chatID: string,
+  participants: string[],
+) {
+  const session = await getServerSession(authOptions);
+  const query = participants.map((participant) => ({ id: participant }));
+  const data = await prisma.conversion.update({
+    where: { id: chatID, admins: { some: { id: session?.user.id } } },
+    data: {
+      members: {
+        disconnect: query,
+      },
+      admins: {
+        disconnect: query,
+      },
+    },
+  });
+  if (data) {
+    await pusher.trigger(
+      `presence-room@${chatID}`,
+      Events.MEMBERS_REMOVED,
+      participants,
+    );
+  }
 }

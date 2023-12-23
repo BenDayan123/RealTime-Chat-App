@@ -10,11 +10,16 @@ interface Props {
 const Info: React.FC<Props> = ({ show }) => {
   const [page, setPage] = useState(0);
 
+  // function changePage(page: number) {
+  //   if (page < 0) setShow(false);
+  //   setPage(page);
+  // }
+
   return (
     <AnimatePresence>
       {show && (
         <motion.div
-          className="absolute right-0 top-0 z-30 h-full w-[25vw] bg-surface-light text-gray-700 dark:bg-surface-dark dark:text-white"
+          className="absolute right-0 top-0 z-30 h-full w-[25vw] bg-surface-light text-gray-700 dark:bg-surface-dark dark:text-white max-lg:w-full"
           animate={{ opacity: 1, x: 0 }}
           initial={{ opacity: 0, x: "100%" }}
           exit={{ opacity: 0, x: "100%" }}

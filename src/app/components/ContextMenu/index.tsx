@@ -67,7 +67,7 @@ export const ContextMenuWrapper: React.FC<Props> = ({
       {showMenu && (
         <div
           ref={contextRef}
-          className="fixed z-[999999] w-max overflow-hidden rounded-lg bg-white p-1 shadow-lg dark:bg-[#18191c] dark:shadow-none"
+          className="fixed z-[99999] w-max overflow-hidden rounded-lg bg-white p-1 shadow-lg dark:bg-[#18191c] dark:shadow-none"
           style={{ left: `${anchorPoint.x}px`, top: `${anchorPoint.y}px` }}
         >
           {items}

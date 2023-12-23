@@ -2,9 +2,9 @@
 
 import { PropsWithChildren, useCallback, useEffect, memo } from "react";
 import { cn, isUrl, urlRegex } from "@lib/utils";
-import { MdDoneAll, MdDone } from "react-icons/md";
+import { MdDoneAll } from "react-icons/md";
 import { useInView } from "react-intersection-observer";
-import { IFile } from "@interfaces/message";
+import { IFile, IMessage } from "@interfaces/message";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ContextMenuWrapper, Item } from "./ContextMenu";
@@ -12,9 +12,10 @@ import { IoMdTrash } from "react-icons/io";
 import axios from "axios";
 import { useChat } from "@hooks/useChat";
 import { MessageType } from "@prisma/client";
-import { useEdgeStore } from "@lib/store";
 import { YouTubeEmbed } from "react-social-media-embed";
-import ProfileStatus from "./ProfileStatus";
+import ReactionBar from "./ReactionBar";
+import { AddReaction } from "@actions/message";
+import { useSession } from "next-auth/react";
 
 interface Props {
   id: string;
@@ -25,6 +26,7 @@ interface Props {
   type: MessageType;
   showBG?: boolean;
   profile?: string;
+  reactions: IMessage["reactions"];
   time: string;
   body?: string;
   files?: IFile[];
@@ -40,15 +42,16 @@ export const Message: React.FC<PropsWithChildren<Props>> = memo(
     isConnected,
     seen,
     type,
-    profile,
     time,
     onDelete,
     body,
     id,
+    reactions,
     onView,
     showBG = true,
   }) => {
     const { ref, inView } = useInView({ triggerOnce: true });
+    const { data: session } = useSession();
     const { chatID } = useChat();
 
     useEffect(() => {
@@ -61,35 +64,6 @@ export const Message: React.FC<PropsWithChildren<Props>> = memo(
         data: { messages: [id], channel_id: chatID },
       });
     }
-
-    const embedLink = useCallback((link: string) => {
-      const host = new URL(link).host;
-      switch (host.replace("www.", "").split(".")[0]) {
-        case "youtube": {
-          return <YouTubeEmbed url={link} width={450} height={253} />;
-        }
-        default: {
-          return (
-            <Link href={link} target="_blank">
-              {link}
-            </Link>
-          );
-        }
-      }
-    }, []);
-
-    const renderBody = useCallback(() => {
-      return body?.split(urlRegex).map((word, i) =>
-        isUrl(word) ? (
-          <div className="my-1 overflow-hidden rounded-lg" key={i}>
-            {embedLink(word)}
-          </div>
-        ) : (
-          word
-        ),
-      );
-    }, [body, embedLink]);
-
     if (!children && !body) return null;
 
     return (
@@ -113,24 +87,36 @@ export const Message: React.FC<PropsWithChildren<Props>> = memo(
             <>
               <Item
                 className="hover:bg-opacity-0 dark:hover:bg-opacity-0"
-                divide
+                divide={mine}
               >
                 {["😁", "👍", "❤️", "😂"].map((emoji) => (
                   <div
                     key={emoji}
-                    className="aspect-square rounded-full bg-gray-700/10 p-2 transition-all hover:brightness-125 dark:bg-white/10"
+                    onClick={() => AddReaction(id, emoji)}
+                    className={cn(
+                      "aspect-square rounded-full bg-gray-700/10 p-2 text-sm transition-all hover:scale-110 dark:bg-white/10",
+                      reactions[emoji]?.find(
+                        (user) => user.id === session?.user.id,
+                      ) && "bg-blue-400 hover:scale-100 dark:bg-blue-400",
+                    )}
                   >
                     {emoji}
                   </div>
                 ))}
               </Item>
-              <Item>Select Message</Item>
-              <Item divide={mine}>Edit</Item>
+              <Item divide={!mine} show={mine}>
+                Edit
+              </Item>
               <Item
                 onClick={() => DeleteMessage()}
                 show={mine}
-                className="text-red-500 hover:bg-red-700/30 dark:text-red-500"
-                icon={<IoMdTrash size={20} className="fill-red-500" />}
+                className="text-red-500 hover:bg-red-500 dark:text-red-500 dark:hover:bg-red-500 hover:dark:text-white"
+                icon={
+                  <IoMdTrash
+                    size={20}
+                    className="fill-red-500 group-hover:fill-white"
+                  />
+                }
               >
                 Delete
               </Item>
@@ -148,8 +134,8 @@ export const Message: React.FC<PropsWithChildren<Props>> = memo(
               !isConnected && mine && "rounded-tr-none",
             )}
           >
-            {body && <p className="whitespace-pre-line">{renderBody()}</p>}
             {type !== "TEXT" && children}
+            <EmbedBody body={body} />
             <div
               className={cn(
                 "mt-2 flex justify-end gap-x-2",
@@ -169,10 +155,44 @@ export const Message: React.FC<PropsWithChildren<Props>> = memo(
             </div>
           </div>
         </ContextMenuWrapper>
+        <ReactionBar reactions={reactions} />
       </motion.div>
     );
   },
 );
+
+const EmbedBody: React.FC<{ body?: string }> = ({ body }) => {
+  const embedLink = useCallback((link: string) => {
+    const host = new URL(link).host;
+    switch (host.replace("www.", "").split(".")[0]) {
+      // case "youtube": {
+      //   return <YouTubeEmbed url={link} width={450} height={253} />;
+      // }
+      default: {
+        return (
+          <Link href={link} target="_blank">
+            {link}
+          </Link>
+        );
+      }
+    }
+  }, []);
+
+  if (!body) return null;
+  return (
+    <div className="whitespace-pre-line">
+      {body.split(urlRegex).map((word, i) =>
+        isUrl(word) ? (
+          <div className="my-1 overflow-hidden rounded-lg" key={word + i}>
+            {embedLink(word)}
+          </div>
+        ) : (
+          word
+        ),
+      )}
+    </div>
+  );
+};
 
 // bg-blue-400
 // import {

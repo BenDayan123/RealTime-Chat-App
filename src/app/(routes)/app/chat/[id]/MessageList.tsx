@@ -49,7 +49,17 @@ const MessageList: React.FC<Props> = ({ messages }) => {
   return (
     <>
       {messages.map((message, i) => {
-        const { body, from, id, createdAt, seen, files, voice, type } = message;
+        const {
+          body,
+          from,
+          id,
+          createdAt,
+          seen,
+          files,
+          voice,
+          type,
+          reactions,
+        } = message;
         const mine = from.id === session?.user.id,
           { images, other } = groupBy(files, ({ url }) =>
             mime.getType(url)?.split("/")[0] === "image" ? "images" : "other",
@@ -73,9 +83,10 @@ const MessageList: React.FC<Props> = ({ messages }) => {
           onView,
           profile: from.image,
           sender: from.name,
+          reactions: reactions ?? [],
           seen: isAllSeen,
           time: dayjs(createdAt).format("HH:mm"),
-          isConnected: i !== 0 && messages[i - 1].fromID === message.fromID,
+          isConnected: messages[i - 1]?.fromID === message.fromID,
         };
         return (
           <React.Fragment key={id}>

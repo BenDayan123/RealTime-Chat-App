@@ -1,11 +1,11 @@
 import { useRouter } from "next/navigation";
-import { leaveGroup } from "@actions/group";
+import { leaveGroup, removeParticipants } from "@actions/group";
 import { usePusher } from "@hooks/usePusher";
 import { useSession } from "next-auth/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useConversion } from "@hooks/useConversions";
 import { useChat } from "@hooks/useChat";
-import { MdOutlineExitToApp, MdAdd, MdCreate } from "react-icons/md";
+import { MdOutlineExitToApp, MdAdd, MdCreate, MdClose } from "react-icons/md";
 import Button from "@components/buttons/button";
 import { IUser } from "@interfaces/user";
 import { motion } from "framer-motion";
@@ -14,9 +14,10 @@ import { Params, variants } from ".";
 import { ShowMoreText } from "@components/ShowMoreText";
 import { cn } from "@lib/utils";
 import { buttonStyle } from "./AddParticipants";
+import { ContextMenuWrapper, Item } from "@components/ContextMenu";
 
 export function InfoPage({ switchPage }: Params) {
-  const { chatID } = useChat();
+  const { chatID, setShowInfo } = useChat();
   const { members, profile, admins, name, isAdmin, description } =
     useConversion(chatID);
   const { data: session } = useSession();
@@ -40,13 +41,27 @@ export function InfoPage({ switchPage }: Params) {
       initial="initial"
       exit="exit"
       transition={{ duration: 0.4 }}
-      className="h-full space-y-2 overflow-auto bg-surface-light p-7 dark:bg-surface-dark"
+      className="relative h-full space-y-2 overflow-auto bg-surface-light p-7 dark:bg-surface-dark"
     >
-      <Button
-        className={cn(buttonStyle, "absolute right-0 top-0 z-50 m-5")}
-        onClick={() => switchPage(2)}
-        icon={<MdCreate size={25} className="fill-gray-900 dark:fill-white" />}
-      />
+      <div className="flex justify-between">
+        <Button
+          className={cn(
+            buttonStyle,
+            "z-50 bg-red-600/20 hover:border-red-500 hover:bg-red-600/40 dark:bg-red-600/20 dark:hover:border-red-500 dark:hover:bg-red-600/40",
+          )}
+          onClick={() => setShowInfo(false)}
+          icon={
+            <MdClose size={25} className="fill-red-500 dark:fill-red-500" />
+          }
+        />
+        <Button
+          className={cn(buttonStyle, "z-50")}
+          onClick={() => switchPage(2)}
+          icon={
+            <MdCreate size={25} className="fill-gray-900 dark:fill-white" />
+          }
+        />
+      </div>
       <div className="space-y-1">
         <img
           src={profile}
@@ -102,8 +117,8 @@ export function InfoPage({ switchPage }: Params) {
         </div>
       )}
       {admins.map((user) => (
-        <Item
-          isAdmin
+        <MemberRow
+          admin
           name={user.name}
           key={user.id}
           image={user.image}
@@ -111,7 +126,12 @@ export function InfoPage({ switchPage }: Params) {
         />
       ))}
       {members.map((user) => (
-        <Item name={user.name} image={user.image} key={user.id} id={user.id} />
+        <MemberRow
+          name={user.name}
+          image={user.image}
+          key={user.id}
+          id={user.id}
+        />
       ))}
       <Button
         name="Leave Group"
@@ -123,27 +143,52 @@ export function InfoPage({ switchPage }: Params) {
   );
 }
 
-const Item: React.FC<IUser & { isAdmin?: boolean }> = ({
+const MemberRow: React.FC<IUser & { admin?: boolean }> = ({
   id,
   image,
   name,
-  isAdmin = false,
+  admin = false,
 }) => {
   const { data: session } = useSession();
+  const { chatID } = useChat();
+  const { isAdmin } = useConversion(chatID);
 
   return (
-    <UserRow
-      id={id}
-      image={image}
-      name={name}
-      description={session?.user.id === id ? "You" : ""}
-      className="my-1 border-b-gray-500 bg-background-light dark:bg-background-dark"
+    <ContextMenuWrapper
+      items={
+        <>
+          <Item
+            onClick={() => removeParticipants(chatID, [id])}
+            // show={}
+            show
+            className="text-red-500 hover:bg-red-700/30 dark:text-red-500 dark:hover:bg-red-700/30"
+          >
+            Kick {name}
+          </Item>
+        </>
+      }
     >
-      {isAdmin && (
-        <p className="rounded-full bg-green-400/40 px-6 py-1 text-green-500 dark:bg-green-800/40">
-          Admin
-        </p>
-      )}
-    </UserRow>
+      <UserRow
+        id={id}
+        image={image}
+        name={name}
+        description={session?.user.id === id ? "You" : ""}
+        className="my-1 border-b-gray-500 bg-background-light dark:bg-background-dark"
+      >
+        {isAdmin && session?.user.id !== id && (
+          <p
+            className="rounded-full bg-red-400/40 px-3 py-1 text-red-500 hover:scale-110 dark:bg-red-800/40"
+            onClick={() => removeParticipants(chatID, [id])}
+          >
+            Kick <b>{name}</b>
+          </p>
+        )}
+        {admin && (
+          <p className="rounded-full bg-green-400/40 px-6 py-1 text-green-500 dark:bg-green-800/40">
+            Admin
+          </p>
+        )}
+      </UserRow>
+    </ContextMenuWrapper>
   );
 };

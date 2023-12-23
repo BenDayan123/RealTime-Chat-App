@@ -34,7 +34,7 @@ const SideBar: React.FC = () => {
   return (
     <div
       id="sidebar"
-      className="flex flex-col bg-surface-light dark:bg-surface-dark"
+      className="flex flex-col bg-surface-light dark:bg-surface-dark max-md:hidden"
     >
       <ul className="flex items-center gap-2 p-3">
         <Item icon={MdPeopleAlt} navTo="/app/friends" className="flex-1">

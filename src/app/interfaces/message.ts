@@ -13,6 +13,9 @@ export interface IMessage {
   type: MessageType;
   updatedAt: string;
   files: IFile[];
+  reactions: {
+    [key: IReaction["emoji"]]: IReaction["user"][];
+  };
 }
 
 export interface IFile {
@@ -23,6 +26,11 @@ export interface IFile {
   url: string;
   uploadedAt: Date;
   message?: IMessage;
+}
+
+export interface IReaction {
+  emoji: string;
+  user: Pick<IUser, "id" | "image" | "name">;
 }
 
 export type MessageType =
