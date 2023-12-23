@@ -161,6 +161,8 @@ export const Message: React.FC<PropsWithChildren<Props>> = memo(
   },
 );
 
+Message.displayName = "Message";
+
 const EmbedBody: React.FC<{ body?: string }> = ({ body }) => {
   const embedLink = useCallback((link: string) => {
     const host = new URL(link).host;
