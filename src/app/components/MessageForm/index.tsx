@@ -8,6 +8,7 @@ import TextareaAutosize from "react-textarea-autosize";
 import EmojiPicker from "emoji-picker-react";
 import { MdEmojiEmotions, MdSend } from "react-icons/md";
 import { cn } from "@lib/utils";
+import MessageReplay from "@components/MessageReplay";
 import { useSession } from "next-auth/react";
 import { Events } from "@lib/events";
 import { useChat } from "@hooks/useChat";
@@ -26,11 +27,12 @@ const IconStyle =
 const MessageForm: React.FC<Props> = ({ id }) => {
   const { isDarkMode } = useDarkMode(true);
   const [loading, setLoading] = useState(false);
-  const { body, files, setBody, updateFileProgress, cleanChat } = useChat();
+  const { data: session } = useSession();
+  const { body, files, setBody, updateFileProgress, cleanChat, replay } =
+    useChat();
   const { edgestore } = useEdgeStore();
   const [showEmojis, setEmojis] = useState(false);
   const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout>();
-  const { data: session } = useSession();
   const textArea = useRef<HTMLTextAreaElement>(null);
   const pusher = usePusher();
   const channel = pusher?.channel(`presence-room@${id}`);
@@ -59,6 +61,7 @@ const MessageForm: React.FC<Props> = ({ id }) => {
       channel_name: `presence-room@${id}`,
       sender_id: session?.user.id,
       files: uploadedFiles,
+      replay: replay?.id,
       body,
     });
     setLoading(false);
@@ -99,55 +102,62 @@ const MessageForm: React.FC<Props> = ({ id }) => {
   }
 
   return (
-    <div
-      className={cn(
-        `relative flex h-20 items-center overflow-hidden rounded-md border-2 border-blue-400 bg-surface-light px-4 py-2 dark:border-opacity-0 dark:bg-surface-dark`,
-        !pusher?.connection.state && "pointer-events-none opacity-60",
-      )}
-    >
-      <RecordButton
-        onStartRecording={() =>
-          channel?.trigger(Events.USER_RECORDING, { name: session?.user.name })
-        }
-        onStopRecording={() => channel?.trigger(Events.USER_STOP_RECORDING, {})}
-      />
-      <TextareaAutosize
-        value={body}
-        minRows={1}
-        ref={textArea}
-        rows={1}
-        maxRows={10}
-        onKeyDown={handleKeyDown}
-        onInput={handleInput}
-        placeholder="Type a message..."
-        className="max-h-full w-full resize-none bg-tran px-3 text-onBG-light outline-none dark:text-onBG-dark"
-      />
-      <Button onClick={EmojiToggle}>
-        <MdEmojiEmotions className={IconStyle} size={25} />
-      </Button>
-      <Button onClick={SendMessage}>
-        {loading ? (
-          <LineSpinner className="p-0" size={25} />
-        ) : (
-          <MdSend
-            size={25}
-            className={cn(
-              IconStyle,
-              !canSend &&
-                "cursor-not-allowed opacity-10 group-hover:opacity-10",
-            )}
-          />
+    <div className="z-10 overflow-hidden rounded-lg border-2 border-blue-400 bg-surface-light dark:border-opacity-0 dark:bg-surface-dark">
+      {replay && <MessageReplay {...replay} onForm />}
+      <div
+        className={cn(
+          `relative flex h-20 items-center px-4 py-2`,
+          !pusher?.connection.state && "pointer-events-none opacity-60",
         )}
-      </Button>
-      {showEmojis && (
-        <div className="absolute -top-4 right-0 z-20 -translate-y-full">
-          <EmojiPicker
-            onEmojiClick={({ emoji }) => setBody((prev) => prev + emoji)}
-            emojiStyle={"native" as any}
-            theme={(isDarkMode ? "dark" : "light") as any}
-          />
-        </div>
-      )}
+      >
+        <RecordButton
+          onStartRecording={() =>
+            channel?.trigger(Events.USER_RECORDING, {
+              name: session?.user.name,
+            })
+          }
+          onStopRecording={() =>
+            channel?.trigger(Events.USER_STOP_RECORDING, {})
+          }
+        />
+        <TextareaAutosize
+          value={body}
+          minRows={1}
+          ref={textArea}
+          rows={1}
+          maxRows={10}
+          onKeyDown={handleKeyDown}
+          onInput={handleInput}
+          placeholder="Type a message..."
+          className="max-h-full w-full resize-none bg-tran px-3 text-onBG-light outline-none dark:text-onBG-dark"
+        />
+        <Button onClick={EmojiToggle}>
+          <MdEmojiEmotions className={IconStyle} size={25} />
+        </Button>
+        <Button onClick={SendMessage}>
+          {loading ? (
+            <LineSpinner className="p-0" size={25} />
+          ) : (
+            <MdSend
+              size={25}
+              className={cn(
+                IconStyle,
+                !canSend &&
+                  "cursor-not-allowed opacity-10 group-hover:opacity-10",
+              )}
+            />
+          )}
+        </Button>
+        {showEmojis && (
+          <div className="absolute -top-4 right-0 z-20 -translate-y-full">
+            <EmojiPicker
+              onEmojiClick={({ emoji }) => setBody((prev) => prev + emoji)}
+              emojiStyle={"native" as any}
+              theme={(isDarkMode ? "dark" : "light") as any}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 };

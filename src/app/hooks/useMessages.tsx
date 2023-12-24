@@ -88,11 +88,12 @@ export function useMessages(channel_id: string) {
         const updated = old.pages.map((page) =>
           page.map((message) => {
             if (message.id === messageID) {
+              const { reactions } = message;
               return {
                 ...message,
                 reactions: {
-                  ...message.reactions,
-                  [emoji]: [...(message.reactions[emoji] ?? []), user],
+                  ...reactions,
+                  [emoji]: (reactions[emoji] ||= []).concat(user),
                 },
               };
             }
@@ -111,15 +112,18 @@ export function useMessages(channel_id: string) {
           page.map((message) => {
             if (message.id === messageID) {
               const { reactions } = message;
-              return {
+              const data: IMessage = {
                 ...message,
                 reactions: {
                   ...reactions,
-                  [emoji]: reactions[emoji].filter(
-                    (user) => user.id !== userID,
-                  ),
+                  [emoji]:
+                    reactions[emoji]?.filter((user) => user.id !== userID) ??
+                    [],
                 },
               };
+              if (data.reactions[emoji].length === 0)
+                delete data.reactions[emoji];
+              return data;
             }
             return message;
           }),

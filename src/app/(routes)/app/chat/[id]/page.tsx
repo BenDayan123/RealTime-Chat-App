@@ -20,6 +20,7 @@ import { useDarkMode } from "@hooks/useDarkMode";
 import { cn } from "@lib/utils";
 import AvatarsGroup from "@components/AvatarsGroup";
 import Info from "@components/ChatInfo";
+import MessageReplay from "@components/MessageReplay";
 
 interface Props {
   params: {
@@ -37,7 +38,8 @@ export default function ChatApp({ params: { id } }: Props) {
     () => data?.pages.reduce((prev, curr) => [...curr, ...prev], []),
     [data],
   );
-  const { files, setChatID, setFiles, setShowInfo, showInfo } = useChat();
+  const { files, setChatID, setFiles, setShowInfo, showInfo, cleanChat } =
+    useChat();
   const uploadedFiles = useMemo(
     () => files.filter((file) => typeof file.progress == "number"),
     [files],
@@ -76,6 +78,7 @@ export default function ChatApp({ params: { id } }: Props) {
 
   useEffectOnce(() => {
     scrollToBottom();
+    cleanChat();
   });
 
   if (isLoading || !members) return <Squircle />;
@@ -151,7 +154,7 @@ export default function ChatApp({ params: { id } }: Props) {
           }
         />
       </div>
-      <div className="w-full p-5 pt-0">
+      <div className="z-30 w-full p-5 pt-0">
         {uploadedFiles.length === 0 && <FilesDropBar files={files} />}
         {chat.liveAction?.type === "TYPING" && (
           <TypingBubble name={chat.liveAction.user} />

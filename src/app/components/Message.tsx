@@ -2,7 +2,12 @@
 
 import { PropsWithChildren, useCallback, useEffect, memo } from "react";
 import { cn, isUrl, urlRegex } from "@lib/utils";
-import { MdDoneAll } from "react-icons/md";
+import {
+  MdContentCopy,
+  MdDoneAll,
+  MdOutlineReply,
+  MdSpeaker,
+} from "react-icons/md";
 import { useInView } from "react-intersection-observer";
 import { IFile, IMessage } from "@interfaces/message";
 import Link from "next/link";
@@ -16,12 +21,14 @@ import { YouTubeEmbed } from "react-social-media-embed";
 import ReactionBar from "./ReactionBar";
 import { AddReaction } from "@actions/message";
 import { useSession } from "next-auth/react";
+import { IUser } from "@interfaces/user";
+import MessageReplay from "./MessageReplay";
 
 interface Props {
   id: string;
   mine: boolean;
   isConnected?: boolean;
-  sender: string;
+  sender: IUser;
   seen?: boolean;
   type: MessageType;
   showBG?: boolean;
@@ -30,6 +37,7 @@ interface Props {
   time: string;
   body?: string;
   files?: IFile[];
+  replay: IMessage["replay"];
   onView?: (inView: boolean) => void;
   onDelete?: () => Promise<any>;
 }
@@ -40,19 +48,21 @@ export const Message: React.FC<PropsWithChildren<Props>> = memo(
     mine,
     sender,
     isConnected,
+    replay,
     seen,
     type,
     time,
     onDelete,
     body,
     id,
+    files,
     reactions,
     onView,
     showBG = true,
   }) => {
     const { ref, inView } = useInView({ triggerOnce: true });
     const { data: session } = useSession();
-    const { chatID } = useChat();
+    const { chatID, setReplay } = useChat();
 
     useEffect(() => {
       onView && void onView(inView);
@@ -79,7 +89,7 @@ export const Message: React.FC<PropsWithChildren<Props>> = memo(
       >
         {!mine && !isConnected && (
           <p className="col-start-2 row-start-1 my-1 text-sm font-bold text-onBG-light dark:text-onBG-dark">
-            {sender}
+            {sender.name}
           </p>
         )}
         <ContextMenuWrapper
@@ -87,7 +97,7 @@ export const Message: React.FC<PropsWithChildren<Props>> = memo(
             <>
               <Item
                 className="hover:bg-opacity-0 dark:hover:bg-opacity-0"
-                divide={mine}
+                divide
               >
                 {["😁", "👍", "❤️", "😂"].map((emoji) => (
                   <div
@@ -104,13 +114,40 @@ export const Message: React.FC<PropsWithChildren<Props>> = memo(
                   </div>
                 ))}
               </Item>
-              <Item divide={!mine} show={mine}>
-                Edit
+              <Item
+                icon={<MdOutlineReply size={20} />}
+                onClick={() =>
+                  setReplay({
+                    id,
+                    body,
+                    files,
+                    from: mine ? { ...sender, name: "You" } : sender,
+                  })
+                }
+              >
+                Replay
+              </Item>
+              <Item
+                onClick={() => navigator.clipboard.writeText(body ?? "")}
+                icon={<MdContentCopy size={20} />}
+              >
+                Copy Text
+              </Item>
+              <Item
+                icon={<MdSpeaker size={20} />}
+                onClick={() => {
+                  const msg = new SpeechSynthesisUtterance(
+                    `${sender.name} saying ${body}`,
+                  );
+                  window.speechSynthesis.speak(msg);
+                }}
+              >
+                Speak Message
               </Item>
               <Item
                 onClick={() => DeleteMessage()}
                 show={mine}
-                className="text-red-500 hover:bg-red-500 dark:text-red-500 dark:hover:bg-red-500 hover:dark:text-white"
+                className="text-red-500 hover:bg-red-500 hover:text-white dark:text-red-500 dark:hover:bg-red-500 hover:dark:text-white"
                 icon={
                   <IoMdTrash
                     size={20}
@@ -125,33 +162,36 @@ export const Message: React.FC<PropsWithChildren<Props>> = memo(
         >
           <div
             className={cn(
-              "message relative col-start-2 h-auto w-fit break-words rounded-md px-4 py-2 font-light",
+              "message relative col-start-2 h-auto w-fit break-words rounded-md font-light",
               mine && "bg-message-out-bg-light text-message-out-text-light",
               !mine &&
                 "bg-message-in-bg-light text-message-in-text-light dark:bg-message-in-bg-dark dark:text-message-in-text-dark",
-              !showBG && "bg-transparent p-0 dark:bg-transparent",
+              !showBG && "bg-transparent dark:bg-transparent",
               !isConnected && !mine && "rounded-tl-none",
               !isConnected && mine && "rounded-tr-none",
             )}
           >
-            {type !== "TEXT" && children}
-            <EmbedBody body={body} />
-            <div
-              className={cn(
-                "mt-2 flex justify-end gap-x-2",
-                !showBG && "text-black dark:text-white",
-              )}
-            >
-              {mine && (
-                <MdDoneAll
-                  className={cn(seen ? "fill-blue-700" : "fill-gray-300")}
-                />
-              )}
-              {time && (
-                <p className="select-none text-right text-[.7rem] opacity-75">
-                  {time}
-                </p>
-              )}
+            {replay && <MessageReplay {...replay} />}
+            <div className={cn("px-4 py-2", !showBG && "p-0")}>
+              {type !== "TEXT" && children}
+              <EmbedBody body={body} />
+              <div
+                className={cn(
+                  "mt-2 flex justify-end gap-x-2",
+                  !showBG && "text-black dark:text-white",
+                )}
+              >
+                {mine && (
+                  <MdDoneAll
+                    className={cn(seen ? "fill-blue-700" : "fill-gray-300")}
+                  />
+                )}
+                {time && (
+                  <p className="select-none text-right text-[.7rem] opacity-75">
+                    {time}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         </ContextMenuWrapper>

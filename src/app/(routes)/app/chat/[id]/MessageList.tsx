@@ -58,6 +58,7 @@ const MessageList: React.FC<Props> = ({ messages }) => {
           files,
           voice,
           type,
+          replay,
           reactions,
         } = message;
         const mine = from.id === session?.user.id,
@@ -79,10 +80,11 @@ const MessageList: React.FC<Props> = ({ messages }) => {
         const data = {
           id,
           type,
+          replay,
           mine,
+          files,
           onView,
-          profile: from.image,
-          sender: from.name,
+          sender: from,
           reactions: reactions ?? [],
           seen: isAllSeen,
           time: dayjs(createdAt).format("HH:mm"),

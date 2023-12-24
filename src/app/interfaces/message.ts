@@ -8,6 +8,7 @@ export interface IMessage {
   from: IUser;
   voice?: IFile;
   seen: UserSeenType[];
+  replay?: Pick<IMessage, "body" | "id" | "from">;
   fromID: string;
   id: string;
   type: MessageType;

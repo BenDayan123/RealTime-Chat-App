@@ -33,6 +33,7 @@ export const UploadVoiceMessage = async ({
     include: {
       from: true,
       files: true,
+      replay: true,
       voice: true,
     },
   });

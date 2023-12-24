@@ -49,6 +49,18 @@ export async function GET(req: Request) {
           name: true,
         },
       },
+      replay: {
+        select: {
+          id: true,
+          files: true,
+          body: true,
+          from: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      },
       files: true,
       voice: true,
     },
@@ -75,6 +87,7 @@ type IForm = {
   channel_name: string;
   sender_id: string;
   type?: MessageType;
+  replay?: string;
 };
 
 function getMessageType(data: IForm): MessageType {
@@ -84,7 +97,7 @@ function getMessageType(data: IForm): MessageType {
 
 export async function POST(req: NextRequest) {
   const data = (await req.json()) as IForm;
-  const { body, channel_name, sender_id, files, type } = data;
+  const { body, channel_name, sender_id, files, type, replay } = data;
   const channel_id = ExtractChannelID(channel_name);
   const message = await prisma.message.create({
     data: {
@@ -100,10 +113,12 @@ export async function POST(req: NextRequest) {
           })),
         },
       },
+      ...(replay && { replay: { connect: { id: replay } } }),
       chat: { connect: { id: channel_id } },
     },
     include: {
       seen: true,
+      replay: true,
       from: {
         select: {
           id: true,

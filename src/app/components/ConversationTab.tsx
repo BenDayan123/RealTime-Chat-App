@@ -15,14 +15,7 @@ interface Props extends IConversion {
   status?: IStatus;
   isLoading: boolean;
 }
-// name: string;
-//   lastStatus: string;
-//   time?: string;
-//   image: string;
-//   id: string;
-//   unseenCount?: number;
-//   className?: string;
-//   status?: IStatus;
+
 const ConversationTab: React.FC<Props> = ({
   id,
   profile,

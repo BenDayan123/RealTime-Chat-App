@@ -59,7 +59,7 @@ export const VoicePlayer: React.FC<Props> = ({ audio, className }) => {
   return (
     <div
       className={cn(
-        "flex items-center gap-x-2 overflow-hidden rounded-full px-2",
+        "flex w-fit items-center gap-x-2 overflow-hidden rounded-full px-2",
         className,
       )}
     >

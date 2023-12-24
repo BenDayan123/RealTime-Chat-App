@@ -1,4 +1,5 @@
 import { FileState } from "@components/DropZoneWrapper";
+import { IMessage } from "@interfaces/message";
 import React, { PropsWithChildren, useCallback, useState } from "react";
 
 interface IContext {
@@ -13,6 +14,8 @@ interface IContext {
   cleanChat: () => void;
   chatID: string;
   setChatID: React.Dispatch<React.SetStateAction<string>>;
+  replay: Partial<IMessage> | null;
+  setReplay: React.Dispatch<React.SetStateAction<Partial<IMessage> | null>>;
 }
 
 const ChatContext = React.createContext<IContext>({} as IContext);
@@ -23,6 +26,7 @@ export function useChat() {
 
 export const ChatProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const [body, setBody] = useState<string>("");
+  const [replay, setReplay] = useState<IContext["replay"]>(null);
   const [files, setFiles] = useState<FileState[]>([]);
   const [chatID, setChatID] = useState<string>("");
   const [showInfo, setShowInfo] = useState(false);
@@ -41,6 +45,7 @@ export const ChatProvider: React.FC<PropsWithChildren> = ({ children }) => {
   }
 
   function cleanChat() {
+    setReplay(null);
     setBody("");
     setFiles([]);
   }
@@ -48,6 +53,8 @@ export const ChatProvider: React.FC<PropsWithChildren> = ({ children }) => {
   return (
     <ChatContext.Provider
       value={{
+        replay,
+        setReplay,
         showInfo,
         setShowInfo,
         body,

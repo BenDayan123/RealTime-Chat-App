@@ -105,7 +105,7 @@ const RecordButton: React.FC<Props> = ({
   if (!mediaRecorder) return null;
 
   return (
-    <div className="flex select-none items-center">
+    <div className="relative flex select-none items-center">
       <Button onClick={handleRecording}>
         {mediaRecorder.state === "recording" ? (
           <MdPauseCircle className="fill-red-500" size={25} />

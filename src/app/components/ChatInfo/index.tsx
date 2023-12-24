@@ -19,7 +19,7 @@ const Info: React.FC<Props> = ({ show }) => {
     <AnimatePresence>
       {show && (
         <motion.div
-          className="absolute right-0 top-0 z-30 h-full w-[25vw] bg-surface-light text-gray-700 dark:bg-surface-dark dark:text-white max-lg:w-full"
+          className="absolute right-0 top-0 z-40 h-full w-[25vw] bg-surface-light text-gray-700 dark:bg-surface-dark dark:text-white max-lg:w-full"
           animate={{ opacity: 1, x: 0 }}
           initial={{ opacity: 0, x: "100%" }}
           exit={{ opacity: 0, x: "100%" }}

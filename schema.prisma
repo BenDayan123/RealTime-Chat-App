@@ -11,20 +11,23 @@ generator client {
 }
 
 model Message {
-    id        String      @id @default(cuid())
-    body      String?     @db.Text
-    from      User        @relation(fields: [fromID], references: [id])
-    fromID    String
-    chat      Conversion  @relation(fields: [chatID], references: [id], onDelete: Cascade)
-    chatID    String
-    voice     File?       @relation(name: "VoiceFile", fields: [voiceID], references: [id], onDelete: Cascade)
-    voiceID   String?     @unique
-    type      MessageType @default(TEXT)
-    seen      User[]      @relation("seenUsers")
-    files     File[]
-    createdAt DateTime    @default(now())
-    updatedAt DateTime    @updatedAt
-    reactions Reaction[]
+    id         String      @id @default(cuid())
+    body       String?     @db.Text
+    from       User        @relation(fields: [fromID], references: [id])
+    fromID     String
+    chat       Conversion  @relation(fields: [chatID], references: [id], onDelete: Cascade)
+    chatID     String
+    voice      File?       @relation(name: "VoiceFile", fields: [voiceID], references: [id], onDelete: Cascade)
+    voiceID    String?     @unique
+    type       MessageType @default(TEXT)
+    seen       User[]      @relation("seenUsers")
+    files      File[]
+    replay     Message?    @relation("replay", fields: [replayId], references: [id])
+    replayFrom Message?    @relation("replay")
+    replayId   String?     @unique
+    createdAt  DateTime    @default(now())
+    updatedAt  DateTime    @updatedAt
+    reactions  Reaction[]
 }
 
 model File {
@@ -103,9 +106,9 @@ model Conversion {
 model Reaction {
     id     Int    @id @default(autoincrement())
     emoji  String @db.VarChar(3)
-    user   User   @relation(fields: [userId], references: [id])
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
     userId String
 
-    message   Message @relation(fields: [messageId], references: [id])
+    message   Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
     messageId String
 }
