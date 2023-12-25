@@ -44,8 +44,8 @@ style="border-radius:5px;width:80%;"/>
 * ⚡ Axios 
 * 🟦 Typescript
 * ⚡ Pusher.js-client
-### Backend - [Next.js](https://nextjs.org), ⚡[Pusher.js](https://pusher.com/), [Edgestore](https://edgestore.dev/) (AW3)
-### Database - [Prisma](https://www.prisma.io/) (Postgresql) and hosted by [Neon](https://neon.tech/)
+### <ins>Backend</ins> - [Next.js](https://nextjs.org), ⚡[Pusher.js](https://pusher.com/), [Edgestore](https://edgestore.dev/) (AW3)
+### <ins>Database</ins> - [Prisma](https://www.prisma.io/) (Postgresql) and hosted by [Neon](https://neon.tech/)
 
 <h3 align="center" style="color:white;">The whole application is powerd and hosted by</h3>
 <p align="center">
