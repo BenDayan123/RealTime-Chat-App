@@ -1,34 +1,53 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+<p align="center">
+<img src="https://github.com/BenDayan123/Textify/assets/57686485/8e123b1e-7fae-45f3-82a0-f13e35186e0b" alt="Typebot illustration" width="200px"/>
+</p>
 
-## Getting Started
 
-First, run the development server:
+<div align="center">
+A web application developed as an SSR with <a href="https://nextjs.org">NextJS</a>, this WhatsApp-inspired chat platform.<br/>
+<b>⚠️ The application currently in Early Beta (more updates and bug fixes on the work) ⚠️</b>
+</div>
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-```
+<h3 align="center">
+  <b><a href="https://nextjs.org/">📨 Try Textify 📨</a></b>
+</h3>
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Supported
+* ```Desktop Web``` (<a href="https://nextjs.org">Next.js</a>)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Prewiew Demo (Light & Dark mode)
+<p align="center">
+<img 
+src="https://github.com/BenDayan123/Textify/assets/57686485/6de2cf05-82ff-40cf-a79b-0e72e6fdc73e" 
+style="border-radius:5px;width:80%;"/>
+</p>
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+## Features
+* 📧 Users can send friend request by just friend's email.
+* 🌑 The app support ```Light/Dark``` mode.
+* 📨 Users can send messages between each other or groups.
+* 🫂 Open group with other friends. 
+* 📃 Edit group's information and sync by all users.
+* 🦵 Admins can kick users from their group.
+* ⌨️ Users can see who typing on the same moment.
+* 📂 Users can upload and send mutiple files (media, text and ect...) to private chat/group.
+* 🎙️ Users can can record themself and send voice message to a chat.
+* 🔁 User can replay to other messages on the conversion.
+* ⛔ User can delete their owm messages.
+* 🚗 The application only load 10 messages at a time for fast performance and lower waiting time.
+* ```and more features coming in the futare...```
 
-## Learn More
+## Tech Stack
+### <ins>Frontend</ins>
+* ⚛️ React
+* 🎨 CSS/SCSS/Tailwind
+* ⚡ Axios 
+* 🟦 Typescript
+* ⚡ Pusher.js-client
+### Backend - [Next.js](https://nextjs.org), ⚡[Pusher.js](https://pusher.com/), [Edgestore](https://edgestore.dev/) (AW3)
+### Database - [Prisma](https://www.prisma.io/) (Postgresql) and hosted by [Neon](https://neon.tech/)
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+<h3 align="center" style="color:white;">The whole application is powerd and hosted by</h3>
+<p align="center">
+  <img width="250" alt="vercel" src="https://github.com/BenDayan123/Textify/assets/57686485/c4c04d5a-15b2-4471-b609-e24db9128f22">
+</p>
