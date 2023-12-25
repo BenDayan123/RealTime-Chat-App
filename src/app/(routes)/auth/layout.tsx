@@ -24,7 +24,7 @@ export default function AuthLayout({
           alt="icon"
           quality={100}
         />
-        <h1 className="text-2xl font-bold text-gray-100">Chat App</h1>
+        <h1 className="text-2xl font-bold text-gray-100">Textify</h1>
       </div>
       <div className="absolute right-[5%] top-1/2 h-[90%] w-[30%] -translate-y-1/2 overflow-hidden transition-all max-lg:left-0 max-lg:top-0 max-lg:h-full max-lg:w-full max-lg:translate-y-0 max-lg:rounded-none">
         <div className="relative flex h-full flex-col items-center justify-center gap-4 overflow-auto rounded-xl bg-background-light p-10 dark:bg-background-dark max-lg:rounded-none">

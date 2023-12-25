@@ -32,15 +32,15 @@ export default function LoginPage() {
       ...data,
       profile: url,
       redirect: false,
-    }).then((res) => {
+    }).then(async (res) => {
       if (!res) return;
       const { error } = res;
       setError(error);
       setLoading(false);
       if (error) {
-        edgestore.publicImages.delete({ url });
+        await edgestore.publicImages.delete({ url });
       } else {
-        edgestore.publicImages.confirmUpload({ url });
+        await edgestore.publicImages.confirmUpload({ url });
         router.push("/app/friends");
       }
     });

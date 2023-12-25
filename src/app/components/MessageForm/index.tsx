@@ -102,7 +102,7 @@ const MessageForm: React.FC<Props> = ({ id }) => {
   }
 
   return (
-    <div className="z-10 overflow-hidden rounded-lg border-2 border-blue-400 bg-surface-light dark:border-opacity-0 dark:bg-surface-dark">
+    <div className="relative z-10 rounded-lg border-2 border-blue-400 bg-surface-light dark:border-opacity-0 dark:bg-surface-dark">
       {replay && <MessageReplay {...replay} onForm />}
       <div
         className={cn(
@@ -148,16 +148,16 @@ const MessageForm: React.FC<Props> = ({ id }) => {
             />
           )}
         </Button>
-        {showEmojis && (
-          <div className="absolute -top-4 right-0 z-20 -translate-y-full">
-            <EmojiPicker
-              onEmojiClick={({ emoji }) => setBody((prev) => prev + emoji)}
-              emojiStyle={"native" as any}
-              theme={(isDarkMode ? "dark" : "light") as any}
-            />
-          </div>
-        )}
       </div>
+      {showEmojis && (
+        <div className="absolute -top-4 right-0 z-50 -translate-y-full">
+          <EmojiPicker
+            onEmojiClick={({ emoji }) => setBody((prev) => prev + emoji)}
+            emojiStyle={"native" as any}
+            theme={(isDarkMode ? "dark" : "light") as any}
+          />
+        </div>
+      )}
     </div>
   );
 };

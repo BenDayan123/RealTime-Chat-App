@@ -30,7 +30,6 @@ const MessageReplay: React.FC<Props> = ({
     if (files && files?.length > 0) return `${files?.length} attachments 📂`;
     return "🎙️ voice message";
   }
-
   return (
     <div className={cn("w-full select-none p-1", onForm && "p-3 pb-0")}>
       <div
@@ -40,7 +39,7 @@ const MessageReplay: React.FC<Props> = ({
         )}
         {...props}
       >
-        <div className="font-bold text-gray-700 dark:text-gray-200">
+        <div className="text-sm font-bold text-gray-700 dark:text-gray-200">
           {onForm && "Replay To "}
           <span className="font-bold text-blue-500">{from?.name}</span>
         </div>

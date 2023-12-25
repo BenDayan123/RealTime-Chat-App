@@ -118,7 +118,18 @@ export async function POST(req: NextRequest) {
     },
     include: {
       seen: true,
-      replay: true,
+      replay: {
+        select: {
+          id: true,
+          files: true,
+          body: true,
+          from: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      },
       from: {
         select: {
           id: true,
