@@ -9,7 +9,7 @@ A web application developed as an SSR with <a href="https://nextjs.org">NextJS</
 </div>
 
 <h3 align="center">
-  <b><a href="https://nextjs.org/">📨 Try Textify 📨</a></b>
+  <b><a href="https://real-time-chat-app-swart-gamma.vercel.app/auth/login">📨 Try Textify 📨</a></b>
 </h3>
 
 ## Supported
