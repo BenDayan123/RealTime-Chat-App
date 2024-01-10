@@ -33,13 +33,15 @@ export const ContextMenuWrapper: React.FC<Props> = ({
       }
     };
 
-    const offClickHandler = (e: MouseEvent) => toggleMenu(false);
+    const offClickHandler = (e: MouseEvent | Event) => toggleMenu(false);
 
+    document.addEventListener("scroll", offClickHandler, true);
     document.addEventListener("contextmenu", contextMenuEventHandler);
     document.addEventListener("click", offClickHandler);
     return () => {
       document.removeEventListener("contextmenu", contextMenuEventHandler);
       document.removeEventListener("click", offClickHandler);
+      document.removeEventListener("scroll", offClickHandler, true);
     };
   }, [anchorPoint, targetID]);
 

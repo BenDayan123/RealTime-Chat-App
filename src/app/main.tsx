@@ -3,7 +3,7 @@
 import { Varela_Round, Inter } from "next/font/google";
 import { useDarkMode } from "@hooks/useDarkMode";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useLayoutEffect } from "react";
 import { usePathname } from "next/navigation";
 
 const varela_font = Varela_Round({
@@ -22,8 +22,8 @@ export default function App({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
 
-  useEffect(() => {
-    pathname === "/" && router.replace("/app");
+  useLayoutEffect(() => {
+    pathname === "/" && router.replace("/app/friends");
   }, [pathname]);
 
   return (

@@ -67,18 +67,18 @@ const SideBar: React.FC = () => {
             );
           })}
       </div>
-      <div className="z-10 mx-auto my-3 flex h-16 w-fit max-w-[80%] items-center gap-4 rounded-full bg-white p-3 text-gray-800 dark:bg-gray-800/70 dark:text-gray-100">
+      <div className="z-10 mx-auto my-3 flex h-16 max-w-[90%] items-center gap-4 rounded-full bg-white p-3 text-gray-800 dark:bg-gray-800/70 dark:text-gray-100">
         <ProfileStatus
           src={session?.user.image || ""}
           status="online"
           alt=""
           className="aspect-square h-full w-auto"
         />
-        <div className="flex-1">
+        <div className="">
           <h1 className="font-bold">{session?.user.name}</h1>
           <p className="text-sm opacity-70">{session?.user.email}</p>
         </div>
-        <div className="cursor-pointer rounded-full p-1 hover:bg-gray-200/50 hover:dark:bg-gray-500/50">
+        <div className="cursor-pointer justify-self-end rounded-full p-1 hover:bg-gray-200/50 hover:dark:bg-gray-500/50">
           {/* <MdMoreHoriz clasName="fill-gray-800 dark:fill-white" size={20} /> */}
           <Switch checked={isDarkMode} onChange={toggle} />
         </div>
